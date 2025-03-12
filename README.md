@@ -50,55 +50,55 @@ Athena employs **both synchronous and asynchronous communication** for efficienc
 - External clients communicate with the **API Gateway** via **RESTful HTTP APIs**.
 - Microservices communicate internally via **RESTful** for simplicity. This will be updated to **gRPC** protocol in the next versions.
 
-### **ASYNCHRONOUS COMMUNICATION [EVENT-DRIVEN ARCHITECTURE]**
-| Event Type                        | Publisher    | Subscribers                                                    | Purpose                                                  |
-|-----------------------------------|--------------|----------------------------------------------------------------|----------------------------------------------------------|
-| **User Domain**                   |              |                                                                |                                                          |
-| `user.created`                    | Users        | Admins, Students, Teachers, Coordinators                       | Propagate new user information to role-specific services |
-| `user.updated`                    | Users        | Admins, Students, Teachers, Coordinators                       | Sync profile changes across services                     |
-| `user.deleted`                    | Users        | Admins, Students, Teachers, Coordinators, Courses, Enrollments | Remove user references and cascade deletions             |
-| `user.role.changed`               | Users        | Admins, Students, Teachers, Coordinators                       | Update role-specific services when a user changes roles  |
-| **Admin Domain**                  |              |                                                                |                                                          |
-| `admin.system.configured`         | Admins       | All services                                                   | Broadcast system-wide configuration changes              |
-| `admin.announcement.created`      | Admins       | Users, Students, Teachers, Coordinators                        | Distribute system-wide announcements                     |
-| **Student Domain**                |              |                                                                |                                                          |
-| `student.registered`              | Students     | Courses, Enrollments                                           | Make student available for course enrollment             |
-| `student.deactivated`             | Students     | Courses, Enrollments, Assignments, Grades, Attendances         | Suspend student activities                               |
-| **Teacher Domain**                |              |                                                                |                                                          |
-| `teacher.registered`              | Teachers     | Courses, Admins                                                | Make teacher available for course assignment             |
-| `teacher.course.assigned`         | Teachers     | Courses, Students, Enrollments                                 | Notify of teacher assignment to course                   |
-| `teacher.course.removed`          | Teachers     | Courses, Students, Enrollments                                 | Notify of teacher removal from course                    |
-| **Coordinator Domain**            |              |                                                                |                                                          |
-| `coordinator.registered`          | Coordinators | Courses, Admins                                                | Make coordinator available for program management        |
-| `coordinator.program.assigned`    | Coordinators | Courses, Teachers                                              | Notify of coordinator assignment to program              |
-| **Course Domain**                 |              |                                                                |                                                          |
-| `course.created`                  | Courses      | Admins, Teachers, Coordinators, Enrollments                    | Make course available in the system                      |
-| `course.updated`                  | Courses      | Admins, Teachers, Students, Enrollments                        | Notify of course detail changes                          |
-| `course.published`                | Courses      | Students, Teachers, Enrollments                                | Make course available for enrollment                     |
-| `course.archived`                 | Courses      | Students, Teachers, Enrollments, Grades, Assignments           | Mark course as no longer active                          |
-| `course.content.updated`          | Courses      | Students, Teachers                                             | Notify of new or changed course content                  |
-| `course.schedule.updated`         | Courses      | Students, Teachers, Attendances                                | Notify of changes to class schedule                      |
-| **Enrollment Domain**             |              |                                                                |                                                          |
-| `enrollment.created`              | Enrollments  | Students, Courses, Teachers, Grades, Attendances               | Register student in course and dependent services        |
-| `enrollment.dropped`              | Enrollments  | Students, Courses, Teachers, Grades, Attendances               | Remove student from course and dependent services        |
-| `enrollment.status.changed`       | Enrollments  | Students, Courses, Teachers, Grades                            | Update enrollment status (active, on leave, etc.)        |
-| **Assignment Domain**             |              |                                                                |                                                          |
-| `assignment.created`              | Assignments  | Courses, Students, Teachers, Grades                            | Notify of new assignment                                 |
-| `assignment.updated`              | Assignments  | Courses, Students, Teachers, Grades                            | Notify of assignment changes                             |
-| `assignment.deadline.approaching` | Assignments  | Students                                                       | Remind students of upcoming deadlines                    |
-| `assignment.submitted`            | Assignments  | Teachers, Grades                                               | Notify teacher of new submission                         |
-| `assignment.feedback.provided`    | Assignments  | Students                                                       | Notify student of feedback                               |
-| **Grade Domain**                  |              |                                                                |                                                          |
-| `grade.submitted`                 | Grades       | Students, Teachers, Courses                                    | Record new grade and notify relevant parties             |
-| `grade.updated`                   | Grades       | Students, Teachers, Courses                                    | Notify of grade changes                                  |
-| `grade.finalized`                 | Grades       | Students, Teachers, Courses, Admins                            | Lock in final grades for a course                        |
-| `grade.calculated`                | Grades       | Students, Teachers, Courses                                    | Update overall course grade                              |
-| **Attendance Domain**             |              |                                                                |                                                          |
-| `attendance.recorded`             | Attendances  | Students, Teachers, Courses                                    | Register student attendance for a session                |
-| `attendance.updated`              | Attendances  | Students, Teachers, Courses                                    | Modify existing attendance record                        |
-| `attendance.threshold.reached`    | Attendances  | Students, Teachers, Coordinators                               | Alert when student misses significant classes            |
-
-***
+  ### **ASYNCHRONOUS COMMUNICATION [EVENT-DRIVEN ARCHITECTURE]**
+  | Event Type                        | Publisher    | Subscribers                                                    | Purpose                                                  |
+  |-----------------------------------|--------------|----------------------------------------------------------------|----------------------------------------------------------|
+  | **User Domain**                   |              |                                                                |                                                          |
+  | `user.created`                    | Users        | Admins, Students, Teachers, Coordinators                       | Propagate new user information to role-specific services |
+  | `user.updated`                    | Users        | Admins, Students, Teachers, Coordinators                       | Sync profile changes across services                     |
+  | `user.deleted`                    | Users        | Admins, Students, Teachers, Coordinators, Courses, Enrollments | Remove user references and cascade deletions             |
+  | `user.role.changed`               | Users        | Admins, Students, Teachers, Coordinators                       | Update role-specific services when a user changes roles  |
+  | **Admin Domain**                  |              |                                                                |                                                          |
+  | `admin.system.configured`         | Admins       | All services                                                   | Broadcast system-wide configuration changes              |
+  | `admin.announcement.created`      | Admins       | Users, Students, Teachers, Coordinators                        | Distribute system-wide announcements                     |
+  | **Student Domain**                |              |                                                                |                                                          |
+  | `student.registered`              | Students     | Courses, Enrollments                                           | Make student available for course enrollment             |
+  | `student.deactivated`             | Students     | Courses, Enrollments, Assignments, Grades, Attendances         | Suspend student activities                               |
+  | **Teacher Domain**                |              |                                                                |                                                          |
+  | `teacher.registered`              | Teachers     | Courses, Admins                                                | Make teacher available for course assignment             |
+  | `teacher.course.assigned`         | Teachers     | Courses, Students, Enrollments                                 | Notify of teacher assignment to course                   |
+  | `teacher.course.removed`          | Teachers     | Courses, Students, Enrollments                                 | Notify of teacher removal from course                    |
+  | **Coordinator Domain**            |              |                                                                |                                                          |
+  | `coordinator.registered`          | Coordinators | Courses, Admins                                                | Make coordinator available for program management        |
+  | `coordinator.program.assigned`    | Coordinators | Courses, Teachers                                              | Notify of coordinator assignment to program              |
+  | **Course Domain**                 |              |                                                                |                                                          |
+  | `course.created`                  | Courses      | Admins, Teachers, Coordinators, Enrollments                    | Make course available in the system                      |
+  | `course.updated`                  | Courses      | Admins, Teachers, Students, Enrollments                        | Notify of course detail changes                          |
+  | `course.published`                | Courses      | Students, Teachers, Enrollments                                | Make course available for enrollment                     |
+  | `course.archived`                 | Courses      | Students, Teachers, Enrollments, Grades, Assignments           | Mark course as no longer active                          |
+  | `course.content.updated`          | Courses      | Students, Teachers                                             | Notify of new or changed course content                  |
+  | `course.schedule.updated`         | Courses      | Students, Teachers, Attendances                                | Notify of changes to class schedule                      |
+  | **Enrollment Domain**             |              |                                                                |                                                          |
+  | `enrollment.created`              | Enrollments  | Students, Courses, Teachers, Grades, Attendances               | Register student in course and dependent services        |
+  | `enrollment.dropped`              | Enrollments  | Students, Courses, Teachers, Grades, Attendances               | Remove student from course and dependent services        |
+  | `enrollment.status.changed`       | Enrollments  | Students, Courses, Teachers, Grades                            | Update enrollment status (active, on leave, etc.)        |
+  | **Assignment Domain**             |              |                                                                |                                                          |
+  | `assignment.created`              | Assignments  | Courses, Students, Teachers, Grades                            | Notify of new assignment                                 |
+  | `assignment.updated`              | Assignments  | Courses, Students, Teachers, Grades                            | Notify of assignment changes                             |
+  | `assignment.deadline.approaching` | Assignments  | Students                                                       | Remind students of upcoming deadlines                    |
+  | `assignment.submitted`            | Assignments  | Teachers, Grades                                               | Notify teacher of new submission                         |
+  | `assignment.feedback.provided`    | Assignments  | Students                                                       | Notify student of feedback                               |
+  | **Grade Domain**                  |              |                                                                |                                                          |
+  | `grade.submitted`                 | Grades       | Students, Teachers, Courses                                    | Record new grade and notify relevant parties             |
+  | `grade.updated`                   | Grades       | Students, Teachers, Courses                                    | Notify of grade changes                                  |
+  | `grade.finalized`                 | Grades       | Students, Teachers, Courses, Admins                            | Lock in final grades for a course                        |
+  | `grade.calculated`                | Grades       | Students, Teachers, Courses                                    | Update overall course grade                              |
+  | **Attendance Domain**             |              |                                                                |                                                          |
+  | `attendance.recorded`             | Attendances  | Students, Teachers, Courses                                    | Register student attendance for a session                |
+  | `attendance.updated`              | Attendances  | Students, Teachers, Courses                                    | Modify existing attendance record                        |
+  | `attendance.threshold.reached`    | Attendances  | Students, Teachers, Coordinators                               | Alert when student misses significant classes            |
+  
+  ***
 
 DATABASE CHOICES
 -
