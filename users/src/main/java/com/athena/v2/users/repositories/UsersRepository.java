@@ -1,0 +1,19 @@
+package com.athena.v2.users.repositories;
+
+import com.athena.v2.libraries.enums.UserStatus;
+import com.athena.v2.users.models.Users;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface UsersRepository extends JpaRepository<Users, Long> {
+    boolean existsByEmailOrUsername(String email, String username);
+    Optional<Users> findByEmailOrUsername(String email, String username);
+    Optional<Users> findByUserStatus(UserStatus userStatus);
+    Optional<Users> findUsersByUserId(String userId);
+
+    List<Users> getUsersByUserStatus(UserStatus userStatus);
+}

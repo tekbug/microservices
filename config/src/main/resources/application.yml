@@ -1,0 +1,22 @@
+server:
+  port: 8088
+  shutdown: graceful
+  tomcat:
+    connection-timeout: 2s
+    keep-alive-timeout: 15s
+    threads:
+      max: 50
+      min-spare: 5
+spring:
+  application:
+    name: "config-server"
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/tekbug/config-repo
+          username: tekbug
+          password: ${PASSWORD}
+          default-label: master
+          clone-on-start: false
+          force-pull: true

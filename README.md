@@ -51,21 +51,52 @@ Athena employs **both synchronous and asynchronous communication** for efficienc
 - Microservices communicate internally via **RESTful** for simplicity. This will be updated to **gRPC** protocol in the next versions.
 
 ### **ASYNCHRONOUS COMMUNICATION [EVENT-DRIVEN ARCHITECTURE]**
-Athena leverages event-driven messaging using **RabbitMQ** for inter-service communication. This enables scalability, decoupling, and reliability. Below you can find the sample event producers and consumers in our system.
-
-| Event Producer           | Events Published                          |
-|--------------------------|-------------------------------------------|
-| **Attendance Service**   | `attendance.marked`, `attendance.updated` |
-| **Enrollment Service**   | `student.enrolled`, `student.unenrolled`  |
-| **Course Service**       | `course.created`, `course.archived`       |
-| **Notification Service** | `notification.sent`, `notification.read`  |
-
-### **Event Consumers**
-| Consumer                 | Subscribed Events                        |
-|--------------------------|------------------------------------------|
-| **Analytics Service**    | `attendance.marked`, `student.enrolled`  |
-| **Notification Service** | `course.created`, `attendance.marked`    |
-| **Student Service**      | `student.enrolled`, `student.unenrolled` |
+| Event Type                        | Publisher    | Subscribers                                                    | Purpose                                                  |
+|-----------------------------------|--------------|----------------------------------------------------------------|----------------------------------------------------------|
+| **User Domain**                   |              |                                                                |                                                          |
+| `user.created`                    | Users        | Admins, Students, Teachers, Coordinators                       | Propagate new user information to role-specific services |
+| `user.updated`                    | Users        | Admins, Students, Teachers, Coordinators                       | Sync profile changes across services                     |
+| `user.deleted`                    | Users        | Admins, Students, Teachers, Coordinators, Courses, Enrollments | Remove user references and cascade deletions             |
+| `user.role.changed`               | Users        | Admins, Students, Teachers, Coordinators                       | Update role-specific services when a user changes roles  |
+| **Admin Domain**                  |              |                                                                |                                                          |
+| `admin.system.configured`         | Admins       | All services                                                   | Broadcast system-wide configuration changes              |
+| `admin.announcement.created`      | Admins       | Users, Students, Teachers, Coordinators                        | Distribute system-wide announcements                     |
+| **Student Domain**                |              |                                                                |                                                          |
+| `student.registered`              | Students     | Courses, Enrollments                                           | Make student available for course enrollment             |
+| `student.deactivated`             | Students     | Courses, Enrollments, Assignments, Grades, Attendances         | Suspend student activities                               |
+| **Teacher Domain**                |              |                                                                |                                                          |
+| `teacher.registered`              | Teachers     | Courses, Admins                                                | Make teacher available for course assignment             |
+| `teacher.course.assigned`         | Teachers     | Courses, Students, Enrollments                                 | Notify of teacher assignment to course                   |
+| `teacher.course.removed`          | Teachers     | Courses, Students, Enrollments                                 | Notify of teacher removal from course                    |
+| **Coordinator Domain**            |              |                                                                |                                                          |
+| `coordinator.registered`          | Coordinators | Courses, Admins                                                | Make coordinator available for program management        |
+| `coordinator.program.assigned`    | Coordinators | Courses, Teachers                                              | Notify of coordinator assignment to program              |
+| **Course Domain**                 |              |                                                                |                                                          |
+| `course.created`                  | Courses      | Admins, Teachers, Coordinators, Enrollments                    | Make course available in the system                      |
+| `course.updated`                  | Courses      | Admins, Teachers, Students, Enrollments                        | Notify of course detail changes                          |
+| `course.published`                | Courses      | Students, Teachers, Enrollments                                | Make course available for enrollment                     |
+| `course.archived`                 | Courses      | Students, Teachers, Enrollments, Grades, Assignments           | Mark course as no longer active                          |
+| `course.content.updated`          | Courses      | Students, Teachers                                             | Notify of new or changed course content                  |
+| `course.schedule.updated`         | Courses      | Students, Teachers, Attendances                                | Notify of changes to class schedule                      |
+| **Enrollment Domain**             |              |                                                                |                                                          |
+| `enrollment.created`              | Enrollments  | Students, Courses, Teachers, Grades, Attendances               | Register student in course and dependent services        |
+| `enrollment.dropped`              | Enrollments  | Students, Courses, Teachers, Grades, Attendances               | Remove student from course and dependent services        |
+| `enrollment.status.changed`       | Enrollments  | Students, Courses, Teachers, Grades                            | Update enrollment status (active, on leave, etc.)        |
+| **Assignment Domain**             |              |                                                                |                                                          |
+| `assignment.created`              | Assignments  | Courses, Students, Teachers, Grades                            | Notify of new assignment                                 |
+| `assignment.updated`              | Assignments  | Courses, Students, Teachers, Grades                            | Notify of assignment changes                             |
+| `assignment.deadline.approaching` | Assignments  | Students                                                       | Remind students of upcoming deadlines                    |
+| `assignment.submitted`            | Assignments  | Teachers, Grades                                               | Notify teacher of new submission                         |
+| `assignment.feedback.provided`    | Assignments  | Students                                                       | Notify student of feedback                               |
+| **Grade Domain**                  |              |                                                                |                                                          |
+| `grade.submitted`                 | Grades       | Students, Teachers, Courses                                    | Record new grade and notify relevant parties             |
+| `grade.updated`                   | Grades       | Students, Teachers, Courses                                    | Notify of grade changes                                  |
+| `grade.finalized`                 | Grades       | Students, Teachers, Courses, Admins                            | Lock in final grades for a course                        |
+| `grade.calculated`                | Grades       | Students, Teachers, Courses                                    | Update overall course grade                              |
+| **Attendance Domain**             |              |                                                                |                                                          |
+| `attendance.recorded`             | Attendances  | Students, Teachers, Courses                                    | Register student attendance for a session                |
+| `attendance.updated`              | Attendances  | Students, Teachers, Courses                                    | Modify existing attendance record                        |
+| `attendance.threshold.reached`    | Attendances  | Students, Teachers, Coordinators                               | Alert when student misses significant classes            |
 
 ***
 
@@ -74,12 +105,11 @@ DATABASE CHOICES
 
 Each microservice has its own dedicated database for **scalability and isolation**.
 
-| Service(s)                                                                    | Database   | Rationale                                                                  |
-|-------------------------------------------------------------------------------|------------|----------------------------------------------------------------------------|
-| Users, Admins, Students, Teachers, Grades, Coordinators, Courses, Assignments | PostgreSQL | General-purpose relational database; ACID compliance.                      |
-| Attendance                                                                    | MongoDB    | Flexible schema for event-driven attendance data; scalable and performant. |
-| Notifications                                                                 | Redis      | In-memory data store providing very fast read/write operations.            |
-| Analytics                                                                     | ClickHouse | Column-oriented database optimized for fast analytical queries.            |
+| Service(s)                                                                                              | Database          | Rationale                                                                  |
+|---------------------------------------------------------------------------------------------------------|-------------------|----------------------------------------------------------------------------|
+| Users, Admins, Students, Teachers, Grades, Coordinators, Courses, Assignments, Attendances, Enrollments | PostgreSQL        | General-purpose relational database; ACID compliance.                      |
+| Notifications                                                                                           | Redis, PostgreSQL | In-memory data store providing very fast read/write operations.            |
+| Analytics                                                                                               | ClickHouse        | Column-oriented database optimized for fast analytical queries.            |
 
 ***
 
@@ -150,11 +180,11 @@ USER-FACING SERVICES
 
   The API Gateway uses a URL-based routing strategy. The basic format is:
 
-  `/api/v1/{service-name}/{endpoint}`
+  `/api/v2/{service-name}/{endpoint}`
 
   Where:
 
-    *   `/api/v1` is the base API path.
+    *   `/api/v2` is the base API path.
     *   `{service-name}` identifies the target microservice (e.g., `users`, `courses`, `grades`).
     *   `{endpoint}` is the specific endpoint within that microservice.
 
@@ -164,12 +194,12 @@ USER-FACING SERVICES
 
     *   **Error Handling:**  The API Gateway handles errors from the microservices and returns a consistent error response to the client.
 
-    *   **Versioning:** The `/api/v1` path indicates the API version. Future versions might be introduced with a different version number (e.g., `/api/v2`).
+    *   **Versioning:** The `/api/v2` path indicates the API version. Future versions might be introduced with a different version number (e.g., `/api/v3`).
 
     *   **No Direct Endpoints (Generally):**  The API Gateway typically *doesn't* have its own endpoints for managing resources directly.  It primarily acts as a proxy. However,  it *might* have limited management endpoints for things like:
 
-        *   `/api/v1/gateway/health` (for health checks)
-        *   `/api/v1/gateway/routes` (for managing routing rules - potentially only accessible to administrators).  But these are less common.
+        *   `/api/v2/gateway/health` (for health checks)
+        *   `/api/v2/gateway/routes` (for managing routing rules - potentially only accessible to administrators).  But these are less common.
 ***
 ### ADMIN SERVICE [PORT: 8082]
 * This service provides administrative functionalities, including user management, analytics, settings configuration, log retrieval, system health monitoring, audit logs, and other maintenance tasks like issue tracking.

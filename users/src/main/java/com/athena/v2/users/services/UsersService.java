@@ -1,0 +1,158 @@
+package com.athena.v2.users.services;
+
+import com.athena.v2.libraries.dtos.requests.UserIdRequestDTO;
+import com.athena.v2.libraries.dtos.requests.UserRequestDTO;
+import com.athena.v2.libraries.dtos.responses.UserIdResponseDTO;
+import com.athena.v2.libraries.dtos.responses.UserResponseDTO;
+import com.athena.v2.libraries.enums.UserStatus;
+import com.athena.v2.users.annotations.CurrentUser;
+import com.athena.v2.users.exceptions.InvalidUserStatusException;
+import com.athena.v2.users.exceptions.UserAlreadyExistException;
+import com.athena.v2.users.exceptions.UserNotFoundException;
+import com.athena.v2.users.models.Users;
+import com.athena.v2.users.repositories.UsersRepository;
+import com.athena.v2.users.utils.ObjectMappers;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class UsersService {
+
+    private final ObjectMappers objectMappers;
+    private final UsersRepository usersRepository;
+    private final KeycloakService keycloakService;
+
+    @Transactional
+    public void registerUser(UserRequestDTO requestDTO) {
+        try {
+            if (!validateUser(requestDTO)) {
+                Users target = objectMappers.mapUsersToDatabase(requestDTO);
+                Users savedUser = usersRepository.saveAndFlush(target);
+                UserResponseDTO user = getUserById(savedUser.getUserId());
+                log.info("Registered user in database: {}", user);
+                registerUserToKeycloak(user);
+            } else {
+                throw new UserAlreadyExistException("User with email or username already exists.");
+            }
+        } catch (Exception e) {
+            log.error("Registering user failed. Check the logs for more information.", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    public void updateUser(String userId, UserRequestDTO requestDTO) {
+        Users target = getUserByUserIdOrThrow(userId);
+
+        if (!target.getUserRoles().equals(requestDTO.userRoles())) {
+            throw new IllegalArgumentException("User roles cannot be updated through this endpoint.");
+        }
+
+        target.getPhoneNumbers().clear();
+        target.getAddressList().clear();
+
+        target.setUsername(requestDTO.username());
+        target.setFirstName(requestDTO.firstName());
+        target.setMiddleName(requestDTO.middleName());
+        target.setLastName(requestDTO.lastName());
+        target.setEmail(requestDTO.email());
+        target.getPhoneNumbers().addAll(objectMappers.mapPhoneNumbersToDatabase(requestDTO.phoneNumbers()));
+        target.getAddressList().addAll(objectMappers.mapAddressesToDatabase(requestDTO.addresses()));
+        target.setUserStatus(requestDTO.userStatus());
+        usersRepository.saveAndFlush(target);
+        log.info("Updated user body: {}", target);
+    }
+
+
+    @Transactional
+    protected void registerUserToKeycloak(UserResponseDTO userDTO) {
+        keycloakService.registerUser(userDTO);
+    }
+
+    public UserResponseDTO getUserById(String userId) {
+        return Optional.of(usersRepository.findUsersByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("Error mapping user to DTO after retrieval.")))
+                .map(objectMappers::mapUserFromDatabase)
+                .orElse(null);
+    }
+
+    public void deleteUserById(String userId) {
+        Users user = getUserByUserIdOrThrow(userId);
+        user.setUserStatus(UserStatus.SUSPENDED);
+        usersRepository.saveAndFlush(user);
+        log.info("User {} logically deleted (status SUSPENDED)", userId);
+    }
+
+    public void updateUserStatus(String userId, String status) {
+        Users user = getUserByUserIdOrThrow(userId);
+        try {
+            user.setUserStatus(UserStatus.valueOf(status.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new InvalidUserStatusException("Invalid user status provided: " + status);
+        }
+        usersRepository.saveAndFlush(user);
+        log.info("User {} status updated to {}", userId, status);
+    }
+
+    public void blockUser(String userId, String status) {
+        updateUserStatus(userId, status);
+    }
+
+    public UserIdResponseDTO returnCurrentUserInformation(@CurrentUser UserIdRequestDTO userIdRequestDTO) {
+        return UserIdResponseDTO.builder()
+                .username(userIdRequestDTO.username())
+                .email(userIdRequestDTO.email())
+                .roles(userIdRequestDTO.roles())
+                .isSuspended(isUserSuspended(userIdRequestDTO.username()))
+                .build();
+    }
+
+    public List<UserResponseDTO> returnAllUsers() {
+        List<Users> users = usersRepository.findAll();
+        if (users.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return users.stream()
+                .map(objectMappers::mapUserFromDatabase)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserResponseDTO> returnUserByUserStatus(String statusCode) {
+        UserStatus userStatus;
+        try {
+            userStatus = UserStatus.valueOf(statusCode.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidUserStatusException("Invalid user status provided: " + statusCode);
+        }
+        List<Users> usersWithStatus = usersRepository.getUsersByUserStatus(userStatus);
+        if (usersWithStatus.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return usersWithStatus.stream()
+                .map(objectMappers::mapUserFromDatabase)
+                .collect(Collectors.toList());
+    }
+
+
+    private boolean isUserSuspended(String userId) {
+        return getUserByUserIdOrThrow(userId).getUserStatus() == UserStatus.SUSPENDED;
+    }
+
+    private boolean validateUser(UserRequestDTO requestDTO) {
+        return usersRepository.existsByEmailOrUsername(requestDTO.email(), requestDTO.username());
+    }
+
+    private Users getUserByUserIdOrThrow(String userId) {
+        return usersRepository.findUsersByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("USER WITH USER ID " + userId + " NOT FOUND"));
+    }
+}
