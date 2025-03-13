@@ -31,8 +31,8 @@ public class SecurityConfig {
               .csrf(ServerHttpSecurity.CsrfSpec::disable)
               .authorizeExchange(exchange -> exchange
                       .anyExchange().authenticated())
-                .oauth2Client(Customizer.withDefaults())
-                .oauth2ResourceServer(OAuth2Spec -> OAuth2Spec.jwt(Customizer.withDefaults()))
+              .oauth2Client(Customizer.withDefaults())
+              .oauth2ResourceServer(OAuth2Spec -> OAuth2Spec.jwt(Customizer.withDefaults()))
               .exceptionHandling(exceptionHandlingSpec ->
                     exceptionHandlingSpec.authenticationEntryPoint(new HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED)))
               .logout(logoutSpec -> logoutSpec.logoutSuccessHandler(oidcLogoutSuccessHandler(repository)))

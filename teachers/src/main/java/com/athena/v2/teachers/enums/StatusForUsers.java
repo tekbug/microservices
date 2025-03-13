@@ -1,0 +1,8 @@
+package com.athena.v2.teachers.enums;
+
+public enum StatusForUsers {
+    ACTIVE,
+    ENDED,
+    SUCCESS,
+    FAILED,
+}

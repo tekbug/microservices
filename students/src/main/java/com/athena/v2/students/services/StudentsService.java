@@ -40,15 +40,17 @@ public class StudentsService {
 
   @Transactional
   public void registerStudent(StudentRegistrationRequestDTO studentRegistrationRequestDTO) {
-//    UserRequestDTO user = webClient.get()
-//        .uri("/api/v2/users/get-user/" + userId)
-//        .retrieve()
-//        .bodyToMono(UserRequestDTO.class)
-//        .block();
 
-//    if (user == null) {
-//      throw new RuntimeException("User is not found");
-//    }
+    UserRequestDTO user = webClient.get()
+        .uri("/api/v2/users/get-user/" + studentRegistrationRequestDTO.userId())
+        .headers(headers -> headers.setBearerAuth(extractToken()))
+        .retrieve()
+        .bodyToMono(UserRequestDTO.class)
+        .block();
+
+    if (user == null) {
+      throw new RuntimeException("User is not found");
+    }
 
     if(!validateStudent(studentRegistrationRequestDTO)) {
       Students registerStudent = objectMappers.mapStudentsToDatabase(studentRegistrationRequestDTO);
@@ -65,12 +67,12 @@ public class StudentsService {
     } else {
       throw new StudentAlreadyExistsException("STUDENT ALREADY EXISTS WITH EITHER THE PROVIDED STUDENT ID OR EMAIL");
     }
-
   }
 
   public UserResponseDTO getStudentByUserId(String userId) {
       return webClient.get()
               .uri("api/v2/users/get-user/" + userId)
+              .headers(headers -> headers.setBearerAuth(extractToken()))
               .retrieve()
               .bodyToMono(UserResponseDTO.class)
               .block();
@@ -80,6 +82,7 @@ public class StudentsService {
     String userRole = "STUDENT";
     return Collections.singletonList(webClient.get()
             .uri("api/v2/users/get-all-users-by-roles/" + userRole)
+            .headers(headers -> headers.setBearerAuth(extractToken()))
             .retrieve()
             .bodyToMono(UserResponseDTO.class)
             .block());
@@ -90,6 +93,7 @@ public class StudentsService {
       target.getGuardians().clear();
       target.setDepartment(studentRegistrationRequestDTO.department());
       target.setBatch(studentRegistrationRequestDTO.batch());
+      target.setGuardians(objectMappers.mapStudentGuardiansToDatabase(studentRegistrationRequestDTO.guardians()));
       studentsRepository.saveAndFlush(target);
 
     log.info("Updated Student body: {}", target);
@@ -134,6 +138,19 @@ public class StudentsService {
       throw new UnauthorizedAccessException("TOKEN CANNOT BE FOUND");
     }
     return userId;
+  }
+
+  private static String extractToken() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null) {
+      throw new UnauthorizedAccessException("TOKEN CANNOT BE FOUND");
+    }
+    if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+      Jwt jwt = jwtAuth.getToken();
+      return jwt.getTokenValue();
+    } else {
+      throw new UnauthorizedAccessException("AUTHENTICATION IS NOT JWT TYPE");
+    }
   }
 
 }

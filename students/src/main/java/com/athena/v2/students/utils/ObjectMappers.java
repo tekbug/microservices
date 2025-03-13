@@ -6,6 +6,7 @@ import com.athena.v2.students.dtos.requests.StudentRegistrationRequestDTO;
 import com.athena.v2.students.models.Guardians;
 import com.athena.v2.students.models.Students;
 import com.athena.v2.students.repositories.StudentsRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -34,7 +35,7 @@ public class ObjectMappers {
         return students;
     }
 
-    private List<Guardians> mapStudentGuardiansToDatabase(List<GuardianRequestDTO> guardians) {
+    public List<Guardians> mapStudentGuardiansToDatabase(List<GuardianRequestDTO> guardians) {
         return guardians.stream()
                 .map(dto -> {
                     Guardians gd = new Guardians();
@@ -46,4 +47,5 @@ public class ObjectMappers {
                 })
                 .collect(Collectors.toList());
     }
+
 }

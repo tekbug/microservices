@@ -31,6 +31,7 @@ import java.util.List;
             Endpoints that are being used to manage users within the system.
             The endpoints are only accessible by users with role of 'ADMIN' or 'SUPER_ADMIN'
         """)
+@PreAuthorize("hasRole('ADMINISTRATOR')")
 public class UsersController {
 
     private final UsersService usersService;
