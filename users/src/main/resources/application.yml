@@ -8,7 +8,7 @@ spring:
   application:
     name: "user-service"
   config:
-    import: "optional:configserver:*"
+    import: "optional:configserver:http://localhost:8888"
   cloud:
     config:
       uri: http://localhost:8888
@@ -20,3 +20,15 @@ spring:
         initial-interval: 1500
         max-interval: 2500
         multiplier: 1.1
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: password
+
+keycloak:
+  serverUrl: http://localhost:8080
+  realm: athenaRealm
+  client-id: edge-service
+  client-secret: akf3zJQ0sikPt0XqzMOKA37FsQQqMCJP
+

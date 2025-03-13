@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  redis:
+    image: redis:7.4-alpine
+    container_name: "athena-redis-final"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli", "PING" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - athena-network
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: "athena-rabbitmq-final"
+    ports:
+      -   "5672:5672"
+      -   "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=password
+    volumes:
+      -   rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - athena-network
+networks:
+  athena-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  rabbitmq-data:

@@ -110,7 +110,6 @@ public class KeycloakService {
         }
     }
 
-    @Scheduled(fixedRate = 60000)
     @Transactional
     public List<String> syncSessionFromKeycloak() {
         String userId = extractUserIdFromKeycloakToken();

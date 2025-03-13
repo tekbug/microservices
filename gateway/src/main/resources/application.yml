@@ -1,0 +1,209 @@
+server:
+  port: 8081
+  netty:
+    connection-timeout: 2s
+    idle-timeout: 15s
+  shutdown: graceful
+
+spring:
+  application:
+    name: "gateway"
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          lower-case-service-id: true
+
+      httpclient:
+        connect-timeout: 2000
+        response-timeout: 5s
+        pool:
+          type: elastic
+          max-idle-time: 15s
+          max-life-time: 60s
+
+      default-filters:
+        - SaveSession
+        - TokenRelay
+#        - name: RequestRateLimiter
+#          args:
+#            redis-rate-limiter:
+#              replenishRate: 10
+#              burstCapacity: 20
+#              requestedTokens: 1
+#        - name: Retry
+#          args:
+#            retries: 3
+#            method: GET
+#            series: SERVER_ERROR
+#            exceptions: java.io.IOException, java.util.concurrent.TimeoutException
+#            backoff:
+#              firstBackoff: 50ms
+#              maxBackOff: 500ms
+#              factor: 2
+#              basedOnPreviousValue: false
+
+      routes:
+        - id: admin-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v2/admin/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: adminCircuitBreaker
+                fallbackUri: forward:/admin-fallback
+        - id: assignment-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/v2/assignments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: assignmentCircuitBreaker
+                fallbackUri: forward:/assignment-fallback
+        - id: attendance-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/v2/attendances/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: attendanceCircuitBreaker
+                fallbackUri: forward:/attendance-fallback
+        - id: classroom-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/v2/classrooms/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: classroomCircuitBreaker
+                fallbackUri: forward:/classroom-fallback
+        - id: coordinator-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/api/v2/coordinators/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: coordinatorCircuitBreaker
+                fallbackUri: forward:/coordinator-fallback
+        - id: course-service
+          uri: http://localhost:8087
+          predicates:
+            - Path=/api/v2/courses/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: courseCircuitBreaker
+                fallbackUri: forward:/course-fallback
+        - id: enrollment-service
+          uri: http://localhost:8088
+          predicates:
+            - Path=/api/v2/enrollments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: enrollmentCircuitBreaker
+                fallbackUri: forward:/enrollment-fallback
+        - id: grade-service
+          uri: http://localhost:8089
+          predicates:
+            - Path=/api/v2/grades/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: gradeCircuitBreaker
+                fallbackUri: forward:/grade-fallback
+        - id: notification-service
+          uri: http://localhost:8090
+          predicates:
+            - Path=/api/v2/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: notificationCircuitBreaker
+                fallbackUri: forward:/notification-fallback
+        - id: student-service
+          uri: http://localhost:8091
+          predicates:
+            - Path=/api/v2/students/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: studentCircuitBreaker
+                fallbackUri: forward:/student-fallback
+        - id: teacher-service
+          uri: http://localhost:8092
+          predicates:
+            - Path=/api/v2/teachers/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: teacherCircuitBreaker
+                fallbackUri: forward:/teacher-fallback
+        - id: user-service
+          uri: http://localhost:8093
+          predicates:
+            - Path=/api/v2/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userCircuitBreaker
+                fallbackUri: forward:/user-fallback
+
+  data:
+    redis:
+      connect-timeout: 2s
+      host: localhost
+      port: 6379
+      timeout: 1s
+  session:
+    timeout: 10m
+
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: edge-service
+            client-secret: test-service-secret
+            scope: openid
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/athenaRealm
+            jwk-set-uri: http://localhost:8080/realms/athenaRealm/protocol/openid-connect/certs
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/athenaRealm
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 20
+        permittedNumberOfCallsInHalfOpenState: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 15000
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+
+logging:
+  level:
+    org:
+      springframework:
+        security: debug
+        cloud:
+          gateway: debug
+
+baseUrl: http://localhost:8081

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class OpenAPIConfig {
 
     @Bean
-    public OpenAPI openAPIConfig() {
+    public OpenAPI apiConfiguration() {
         return new OpenAPI()
                 .info(new Info()
                         .title("Athena User Management API Documentation")

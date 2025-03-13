@@ -1,5 +1,5 @@
 server:
-  port: 8088
+  port: 8888
   shutdown: graceful
   tomcat:
     connection-timeout: 2s
@@ -15,8 +15,8 @@ spring:
       server:
         git:
           uri: https://github.com/tekbug/config-repo
-          username: tekbug
-          password: ${PASSWORD}
+          username: "tekbug"
+          password: "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"
           default-label: master
-          clone-on-start: false
+          clone-on-start: true
           force-pull: true

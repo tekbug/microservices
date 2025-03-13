@@ -3,16 +3,17 @@ package com.athena.v2.libraries.dtos.responses;
 import lombok.Builder;
 import lombok.NonNull;
 
-import java.time.LocalDateTime;
-import java.util.Map;
+import java.time.Instant;
 
 @Builder
 public record NotificationResponseDTO(
-        @NonNull String id,
+        @NonNull String userId,
+        @NonNull String eventId,
         @NonNull String eventType,
-        @NonNull String sourceService,
-        @NonNull String message,
-        boolean isRead,
-        LocalDateTime sentAt,
-        Map<String, Object> payload
+        @NonNull String correlationId,
+        @NonNull String publisher,
+        @NonNull Instant timestamp,
+        @NonNull String payloadJson,
+        boolean isSuccessful,
+        @NonNull String errorMessage
 ) {}

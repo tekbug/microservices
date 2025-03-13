@@ -9,17 +9,17 @@ import com.athena.v2.users.annotations.CurrentUser;
 import com.athena.v2.users.exceptions.InvalidUserStatusException;
 import com.athena.v2.users.exceptions.UserAlreadyExistException;
 import com.athena.v2.users.exceptions.UserNotFoundException;
+import com.athena.v2.users.models.Events;
 import com.athena.v2.users.models.Users;
 import com.athena.v2.users.repositories.UsersRepository;
 import com.athena.v2.users.utils.ObjectMappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,9 +27,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UsersService {
 
-    private final ObjectMappers objectMappers;
     private final UsersRepository usersRepository;
+    private final ObjectMappers objectMappers;
     private final KeycloakService keycloakService;
+    private final RabbitTemplate rabbitTemplate;
 
     @Transactional
     public void registerUser(UserRequestDTO requestDTO) {
@@ -40,6 +41,12 @@ public class UsersService {
                 UserResponseDTO user = getUserById(savedUser.getUserId());
                 log.info("Registered user in database: {}", user);
                 registerUserToKeycloak(user);
+
+                Events register = createEventForPublication(savedUser);
+
+                rabbitTemplate.convertAndSend("user-exchange", "user.created", register);
+
+                log.info("Published user.created event for user ID: {}", savedUser.getUserId());
             } else {
                 throw new UserAlreadyExistException("User with email or username already exists.");
             }
@@ -70,8 +77,14 @@ public class UsersService {
         target.setUserStatus(requestDTO.userStatus());
         usersRepository.saveAndFlush(target);
         log.info("Updated user body: {}", target);
-    }
 
+        createEventForPublication(target);
+        Events event = createEventForPublication(target);
+
+        rabbitTemplate.convertAndSend("user-exchange", "user.updated", event);
+
+        log.info("Published user.updated event for user ID: {}", target.getUserId());
+    }
 
     @Transactional
     protected void registerUserToKeycloak(UserResponseDTO userDTO) {
@@ -90,6 +103,8 @@ public class UsersService {
         user.setUserStatus(UserStatus.SUSPENDED);
         usersRepository.saveAndFlush(user);
         log.info("User {} logically deleted (status SUSPENDED)", userId);
+        Events deleteEvent = createEventForPublication(user);
+        rabbitTemplate.convertAndSend("user-exchange", "user.deleted", deleteEvent);
     }
 
     public void updateUserStatus(String userId, String status) {
@@ -101,6 +116,8 @@ public class UsersService {
         }
         usersRepository.saveAndFlush(user);
         log.info("User {} status updated to {}", userId, status);
+        Events updateEvent = createEventForPublication(user);
+        rabbitTemplate.convertAndSend("user-exchange", "user.updated", updateEvent);
     }
 
     public void blockUser(String userId, String status) {
@@ -154,5 +171,13 @@ public class UsersService {
     private Users getUserByUserIdOrThrow(String userId) {
         return usersRepository.findUsersByUserId(userId)
                 .orElseThrow(() -> new UserNotFoundException("USER WITH USER ID " + userId + " NOT FOUND"));
+    }
+
+    public Events createEventForPublication(Users target) {
+        Events event = new Events();
+        event.setEventId(target.getUserId() + "-" + UUID.randomUUID().toString().substring(0, 8));
+        event.setEventType("user-exchange-events");
+        event.setEntityId(target.getUserId());
+        return event;
     }
 }
