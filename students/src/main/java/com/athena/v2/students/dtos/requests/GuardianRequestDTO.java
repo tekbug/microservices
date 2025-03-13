@@ -9,6 +9,4 @@ public record GuardianRequestDTO(
         @NonNull String relationship,
         @NonNull List<String> phoneNumber,
         @NonNull String email
-        ) {
-
-}
+        ) {}

@@ -1,8 +1,8 @@
 package com.athena.v2.students.services;
 
-import com.athena.v2.users.models.LogCounter;
-import com.athena.v2.users.models.LogCounterId;
-import com.athena.v2.users.repositories.LogCounterRepository;
+import com.athena.v2.students.models.LogCounter;
+import com.athena.v2.students.models.LogCounterId;
+import com.athena.v2.students.repositories.LogCounterRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

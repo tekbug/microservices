@@ -21,6 +21,8 @@ spring:
         max-interval: 2500
         multiplier: 1.1
 
+services.user.url: "http://localhost:8093"
+
 logging:
   level:
     org.springframework.cloud.config.client: debug

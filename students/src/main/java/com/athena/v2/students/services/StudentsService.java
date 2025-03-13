@@ -40,18 +40,15 @@ public class StudentsService {
 
   @Transactional
   public void registerStudent(StudentRegistrationRequestDTO studentRegistrationRequestDTO) {
+//    UserRequestDTO user = webClient.get()
+//        .uri("/api/v2/users/get-user/" + userId)
+//        .retrieve()
+//        .bodyToMono(UserRequestDTO.class)
+//        .block();
 
-    String userId = getUserId();
-
-    UserRequestDTO user = webClient.get()
-        .uri("/api/v2/users/get-user/" + userId)
-        .retrieve()
-        .bodyToMono(UserRequestDTO.class)
-        .block();
-
-    if (user == null) {
-      throw new RuntimeException("User is not found");
-    }
+//    if (user == null) {
+//      throw new RuntimeException("User is not found");
+//    }
 
     if(!validateStudent(studentRegistrationRequestDTO)) {
       Students registerStudent = objectMappers.mapStudentsToDatabase(studentRegistrationRequestDTO);

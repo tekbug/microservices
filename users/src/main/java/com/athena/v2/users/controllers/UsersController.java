@@ -27,8 +27,6 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v2/users")
 @RequiredArgsConstructor
-@EnableMethodSecurity
-@PreAuthorize("hasRole('ADMINISTRATOR')")
 @Tag(name = "Users Controller", description = """
             Endpoints that are being used to manage users within the system.
             The endpoints are only accessible by users with role of 'ADMIN' or 'SUPER_ADMIN'

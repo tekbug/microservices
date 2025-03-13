@@ -1,7 +1,7 @@
 package com.athena.v2.students.repositories;
 
-import com.athena.v2.users.models.LogCounter;
-import com.athena.v2.users.models.LogCounterId;
+import com.athena.v2.students.models.LogCounter;
+import com.athena.v2.students.models.LogCounterId;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

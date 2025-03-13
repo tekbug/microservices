@@ -117,7 +117,7 @@ spring:
                 name: gradeCircuitBreaker
                 fallbackUri: forward:/grade-fallback
         - id: notification-service
-          uri: http://localhost:8090
+          uri: http://localhost:8091
           predicates:
             - Path=/api/v2/notifications/**
           filters:
@@ -126,7 +126,7 @@ spring:
                 name: notificationCircuitBreaker
                 fallbackUri: forward:/notification-fallback
         - id: student-service
-          uri: http://localhost:8091
+          uri: http://localhost:8090
           predicates:
             - Path=/api/v2/students/**
           filters:
