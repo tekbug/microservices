@@ -52,7 +52,25 @@ public class UsersController {
                     content = @Content(mediaType = "application/json", schema = @Schema(description = "Error response")))
     })
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
-        return ResponseEntity.status(HttpStatus.CREATED).body(usersService.returnAllUsers());
+        return ResponseEntity.status(HttpStatus.OK).body(usersService.returnAllUsers());
+    }
+
+    @GetMapping("/get-all-users-by-roles/{role}")
+    @Operation(summary = "Get All Users", description =
+            """
+            Retrieve a list of all users, optionally filtered by status.
+            This endpoint returns a simple list of users.
+            """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful retrieval of users.",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))),
+            @ApiResponse(responseCode = "500", description = "Internal server error.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(description = "Error response")))
+    })
+    public ResponseEntity<List<UserResponseDTO>> getAllUsersByRole(@PathVariable("role") String role) {
+        return ResponseEntity.status(HttpStatus.OK).body(usersService.returnAllUsersByRole(role));
     }
 
     @GetMapping

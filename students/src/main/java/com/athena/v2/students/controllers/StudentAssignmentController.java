@@ -2,11 +2,15 @@ package com.athena.v2.students.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v2/students")
 @RequiredArgsConstructor
+@EnableMethodSecurity
+@PreAuthorize("hasRole('STUDENT')")
 public class StudentAssignmentController {
 
     @PostMapping("assignments/{assignmentId}/submit")
@@ -30,7 +34,7 @@ public class StudentAssignmentController {
     }
 
     @GetMapping("submissions")
-    public ResponseEntity<Object> getAllSubmittedAsssignmentsById() {
+    public ResponseEntity<Object> getAllSubmittedAssignmentsById() {
         return null;
     }
     

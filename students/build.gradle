@@ -29,7 +29,7 @@ ext {
 }
 
 dependencies {
-    implementation 'com.athena.v2:libraries:0.0.2-SNAPSHOT'
+    implementation 'com.athena.v2:libraries:0.0.3-SNAPSHOT'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -42,6 +42,7 @@ dependencies {
     implementation 'org.springframework.amqp:spring-rabbit-stream'
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.springframework.amqp:spring-rabbit-test'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'

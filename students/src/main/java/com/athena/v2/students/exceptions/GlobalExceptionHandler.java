@@ -27,6 +27,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
     }
 
+    @ExceptionHandler(StudentNotFoundException.class)
+    public ResponseEntity<ErrorResponseRecord> handleStudentNotFoundException(StudentNotFoundException ex, WebRequest request) {
+        log.error("Student not found: ", ex);
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
+    }
+
     private ResponseEntity<ErrorResponseRecord> buildErrorResponse(Exception ex, HttpStatus status, WebRequest request) {
         ErrorResponseRecord responseRecord = ErrorResponseRecord.builder()
                 .timestamp(LocalDateTime.now())

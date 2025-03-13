@@ -1,6 +1,8 @@
 package com.athena.v2.students.models;
 
+import com.athena.v2.students.enums.StudentStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -17,12 +19,19 @@ public class Students {
     private Long id;
 
     private String userId;
+
+    @Email
+    private String email;
+
     private String department;
     private String batch;
 
     @OneToMany
     @JoinColumn
     private List<Guardians> guardians;
+
+    @Enumerated(EnumType.STRING)
+    private StudentStatus status;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

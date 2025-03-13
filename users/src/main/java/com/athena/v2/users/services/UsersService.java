@@ -4,6 +4,7 @@ import com.athena.v2.libraries.dtos.requests.UserIdRequestDTO;
 import com.athena.v2.libraries.dtos.requests.UserRequestDTO;
 import com.athena.v2.libraries.dtos.responses.UserIdResponseDTO;
 import com.athena.v2.libraries.dtos.responses.UserResponseDTO;
+import com.athena.v2.libraries.enums.UserRoles;
 import com.athena.v2.libraries.enums.UserStatus;
 import com.athena.v2.users.annotations.CurrentUser;
 import com.athena.v2.users.exceptions.InvalidUserStatusException;
@@ -11,6 +12,7 @@ import com.athena.v2.users.exceptions.UserAlreadyExistException;
 import com.athena.v2.users.exceptions.UserNotFoundException;
 import com.athena.v2.users.models.Events;
 import com.athena.v2.users.models.Users;
+import com.athena.v2.users.repositories.EventsRepository;
 import com.athena.v2.users.repositories.UsersRepository;
 import com.athena.v2.users.utils.ObjectMappers;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 public class UsersService {
 
     private final UsersRepository usersRepository;
+    private final EventsRepository eventsRepository;
     private final ObjectMappers objectMappers;
     private final KeycloakService keycloakService;
     private final RabbitTemplate rabbitTemplate;
@@ -93,7 +96,7 @@ public class UsersService {
 
     public UserResponseDTO getUserById(String userId) {
         return Optional.of(usersRepository.findUsersByUserId(userId)
-                .orElseThrow(() -> new UserNotFoundException("Error mapping user to DTO after retrieval.")))
+                .orElseThrow(() -> new UserNotFoundException("USER IS NOT FOUND")))
                 .map(objectMappers::mapUserFromDatabase)
                 .orElse(null);
     }
@@ -103,8 +106,12 @@ public class UsersService {
         user.setUserStatus(UserStatus.SUSPENDED);
         usersRepository.saveAndFlush(user);
         log.info("User {} logically deleted (status SUSPENDED)", userId);
+
         Events deleteEvent = createEventForPublication(user);
+
         rabbitTemplate.convertAndSend("user-exchange", "user.deleted", deleteEvent);
+
+        log.info("Published user.deleted event for user ID: {}", user.getUserId());
     }
 
     public void updateUserStatus(String userId, String status) {
@@ -118,6 +125,7 @@ public class UsersService {
         log.info("User {} status updated to {}", userId, status);
         Events updateEvent = createEventForPublication(user);
         rabbitTemplate.convertAndSend("user-exchange", "user.updated", updateEvent);
+        log.info("Published user.updated for user ID: {}", user.getUserId());
     }
 
     public void blockUser(String userId, String status) {
@@ -135,6 +143,16 @@ public class UsersService {
 
     public List<UserResponseDTO> returnAllUsers() {
         List<Users> users = usersRepository.findAll();
+        if (users.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return users.stream()
+                .map(objectMappers::mapUserFromDatabase)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserResponseDTO> returnAllUsersByRole(String role) {
+        List<Users> users = usersRepository.findAllByUserRoles(UserRoles.valueOf(role));
         if (users.isEmpty()) {
             return Collections.emptyList();
         }
@@ -178,6 +196,7 @@ public class UsersService {
         event.setEventId(target.getUserId() + "-" + UUID.randomUUID().toString().substring(0, 8));
         event.setEventType("user-exchange-events");
         event.setEntityId(target.getUserId());
+        eventsRepository.saveAndFlush(event);
         return event;
     }
 }

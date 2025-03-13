@@ -8,17 +8,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("students/grade")
+@RequestMapping("api/v2/students")
 @RequiredArgsConstructor
 public class StudentGradeController {
 
-    @GetMapping("{courseId}")
+    @GetMapping("grade/{courseId}")
     public ResponseEntity<Object> getStudentGradeById(@PathVariable("courseId") String courseId) {
         return null;
     }
 
-    @GetMapping("all")
+    @GetMapping("grade-all")
     public ResponseEntity<Object> getAllStudentGradeHistory() {
         return null;
     }
+
 }
