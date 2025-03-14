@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 public record TeacherRegistrationRequestDTO(
         @NonNull String userId,
+        @NonNull String email,
         @NonNull EmploymentStatus employmentStatus,
         LocalDateTime hiredDate,
         @NonNull List<String> specializations,

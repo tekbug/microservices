@@ -1,6 +1,7 @@
 package com.athena.v2.teachers.models;
 
-import com.athena.v2.teachers.enums.EmploymentStatus;
+import com.athena.v2.libraries.enums.EmploymentStatus;
+import com.athena.v2.teachers.enums.TeacherStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,6 +22,7 @@ public class Teachers {
     private Long id;
 
     private String userId;
+    private String email;
     private EmploymentStatus employmentStatus;
     private LocalDateTime hiredDate;
 

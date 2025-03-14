@@ -4,5 +4,6 @@ public enum EmploymentStatus {
     PART_TIME,
     FULL_TIME,
     CONTRACT,
-    FREELANCE
+    FREELANCE,
+    TERMINATED,
 }

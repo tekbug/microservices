@@ -14,7 +14,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    public void sendEmailToStudent(@Email String email, String subject, String body) {
+    public void sendEmailToTeacher(@Email String email, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject(subject);

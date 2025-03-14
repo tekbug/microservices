@@ -1,6 +1,6 @@
 package com.athena.v2.teachers.enums;
 
-public enum StudentStatus {
+public enum TeacherStatus {
     ACTIVE,
     INACTIVE,
     SUSPENDED,

@@ -21,15 +21,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.UNAUTHORIZED, request);
     }
 
-    @ExceptionHandler(StudentAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponseRecord> handleStudentAlreadyExistsException(StudentAlreadyExistsException ex, WebRequest request) {
-        log.error("Student already exists: ", ex);
+    @ExceptionHandler(TeacherAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseRecord> handleStudentAlreadyExistsException(TeacherAlreadyExistsException ex, WebRequest request) {
+        log.error("Teacher already exists: ", ex);
         return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler(StudentNotFoundException.class)
-    public ResponseEntity<ErrorResponseRecord> handleStudentNotFoundException(StudentNotFoundException ex, WebRequest request) {
-        log.error("Student not found: ", ex);
+    @ExceptionHandler(TeacherNotFoundException.class)
+    public ResponseEntity<ErrorResponseRecord> handleStudentNotFoundException(TeacherNotFoundException ex, WebRequest request) {
+        log.error("Teacher not found: ", ex);
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
     }
 

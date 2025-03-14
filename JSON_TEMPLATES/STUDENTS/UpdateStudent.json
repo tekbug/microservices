@@ -1,0 +1,30 @@
+[
+  {
+    "endpoint": "http://localhost:8081/api/v2/students/update-student/{userId}"
+  },
+  {
+    "payload": [
+      {
+        "userId": "user_id",
+        "email": "user_email",
+        "department": "different_department",
+        "batch": "different_batch",
+        "guardians": [
+          {
+            "name": "different_info",
+            "relationship": "Father",
+            "phoneNumber": ["+1-555-111-2222", "+1-555-333-4444"],
+            "email": "father.guardian@test.com"
+          },
+          {
+            "name": "different_info",
+            "relationship": "Mother",
+            "phoneNumber": ["+1-555-555-6666"],
+            "email": "mother.guardian@test.com"
+          }
+        ],
+        "status": "different_status"
+      }
+    ]
+  }
+]
