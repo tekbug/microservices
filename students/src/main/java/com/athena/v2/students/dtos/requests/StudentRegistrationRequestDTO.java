@@ -10,7 +10,6 @@ import java.util.List;
 @Builder
 public record StudentRegistrationRequestDTO(
         @NonNull String userId,
-        @NonNull String email,
         @NonNull String department,
         @NonNull String batch,
         @NonNull List<GuardianRequestDTO> guardians,

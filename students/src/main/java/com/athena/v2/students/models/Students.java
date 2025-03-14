@@ -1,6 +1,6 @@
 package com.athena.v2.students.models;
 
-import com.athena.v2.students.enums.StudentStatus;
+import com.athena.v2.libraries.enums.StudentStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Data;

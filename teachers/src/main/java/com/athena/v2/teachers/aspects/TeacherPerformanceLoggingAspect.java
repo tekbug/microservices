@@ -1,10 +1,10 @@
 package com.athena.v2.teachers.aspects;
 
-import com.athena.v2.users.enums.ActionType;
-import com.athena.v2.users.enums.OperationType;
-import com.athena.v2.users.models.UsersPerformanceLogs;
-import com.athena.v2.users.repositories.UsersPerformanceLogsRepository;
-import com.athena.v2.users.services.IdGeneratorForLogsService;
+import com.athena.v2.teachers.models.TeacherPerformanceLogs;
+import com.athena.v2.teachers.repositories.TeachersPerformanceLogsRepository;
+import com.athena.v2.teachers.services.IdGeneratorForLogsService;
+import com.athena.v2.teachers.enums.ActionType;
+import com.athena.v2.teachers.enums.OperationType;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -16,18 +16,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-import static com.athena.v2.users.aspects.UserActivityLoggingAspect.getActionType;
+import static com.athena.v2.teachers.aspects.TeacherActivityLoggingAspect.getActionType;
 
 @Aspect
 @Component
 @Slf4j
 public class TeacherPerformanceLoggingAspect {
 
-    private final UsersPerformanceLogsRepository performanceLogsRepository;
+    private final TeachersPerformanceLogsRepository performanceLogsRepository;
     private final HttpServletRequest httpServletRequest;
     private final IdGeneratorForLogsService idGenerator;
 
-    public TeacherPerformanceLoggingAspect(UsersPerformanceLogsRepository performanceLogsRepository,
+    public TeacherPerformanceLoggingAspect(TeachersPerformanceLogsRepository performanceLogsRepository,
                                            HttpServletRequest httpServletRequest,
                                            IdGeneratorForLogsService idGenerator) {
         this.performanceLogsRepository = performanceLogsRepository;
@@ -35,9 +35,9 @@ public class TeacherPerformanceLoggingAspect {
         this.idGenerator = idGenerator;
     }
 
-    @Around("execution(* com.athena.v2.users.services.*.*(..)) && " +
-            "!execution(* com.athena.v2.users.repositories.*.*(..)) && " +
-            "!execution(* com.athena.v2.users.services.IdGeneratorForLogsService.*(..))")
+    @Around("execution(* com.athena.v2.teachers.services.*.*(..)) && " +
+            "!execution(* com.athena.v2.teachers.repositories.*.*(..)) && " +
+            "!execution(* com.athena.v2.teachers.services.IdGeneratorForLogsService.*(..))")
 
     public Object logPerformance(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
@@ -51,7 +51,7 @@ public class TeacherPerformanceLoggingAspect {
         log.info("Method {} called with arguments: {}", methodName, args);
         float startTime = System.currentTimeMillis();
 
-        UsersPerformanceLogs performanceLogs = new UsersPerformanceLogs();
+        TeacherPerformanceLogs performanceLogs = new TeacherPerformanceLogs();
 
         try {
             Object result = joinPoint.proceed();
@@ -75,7 +75,6 @@ public class TeacherPerformanceLoggingAspect {
             throw ex;
         } finally {
             float responseTime = (System.currentTimeMillis() - startTime) / 1000f;
-            performanceLogs.setUsedMemory(1L);
             performanceLogs.setResponseTime(responseTime);
             performanceLogs.setIpAddress(ipAddress);
             performanceLogsRepository.saveAndFlush(performanceLogs);
@@ -124,6 +123,5 @@ public class TeacherPerformanceLoggingAspect {
             throw new RuntimeException("FAILED TO LOAD USERNAME");
         }
     }
-
 
 }

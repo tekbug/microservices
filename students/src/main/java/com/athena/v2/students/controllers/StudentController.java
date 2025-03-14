@@ -1,8 +1,8 @@
 package com.athena.v2.students.controllers;
 
+import com.athena.v2.libraries.dtos.requests.StudentRegistrationRequestDTO;
 import com.athena.v2.libraries.dtos.responses.StudentRegistrationResponseDTO;
 import com.athena.v2.libraries.dtos.responses.UserResponseDTO;
-import com.athena.v2.students.dtos.requests.StudentRegistrationRequestDTO;
 import com.athena.v2.students.dtos.responses.StudentWithUserResponseDTO;
 import com.athena.v2.students.services.StudentsService;
 import jakarta.validation.Valid;

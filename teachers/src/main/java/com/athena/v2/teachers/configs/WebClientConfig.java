@@ -11,6 +11,7 @@ public class WebClientConfig {
     @Value("${services.user.url}")
     private String userServiceUrl;
 
+
     @Bean
     public WebClient webClient() {
         return WebClient.builder()

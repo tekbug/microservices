@@ -1,11 +1,10 @@
 package com.athena.v2.students.services;
 
+import com.athena.v2.libraries.dtos.requests.StudentRegistrationRequestDTO;
 import com.athena.v2.libraries.dtos.responses.StudentRegistrationResponseDTO;
 import com.athena.v2.libraries.dtos.responses.UserResponseDTO;
-import com.athena.v2.students.dtos.requests.StudentRegistrationRequestDTO;
-import com.athena.v2.students.dtos.requests.UserRequestDTO;
+import com.athena.v2.libraries.enums.StudentStatus;
 import com.athena.v2.students.dtos.responses.StudentWithUserResponseDTO;
-import com.athena.v2.students.enums.StudentStatus;
 import com.athena.v2.students.exceptions.StudentAlreadyExistsException;
 import com.athena.v2.students.exceptions.StudentNotFoundException;
 import com.athena.v2.students.exceptions.UnauthorizedAccessException;
@@ -18,12 +17,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,32 +45,49 @@ public class StudentsService {
   @Transactional
   public void registerStudent(StudentRegistrationRequestDTO studentRegistrationRequestDTO) {
 
-    UserRequestDTO user = webClient.get()
-        .uri("/api/v2/users/get-user/" + studentRegistrationRequestDTO.userId())
-        .headers(headers -> headers.setBearerAuth(extractToken()))
-        .retrieve()
-        .bodyToMono(UserRequestDTO.class)
-        .block();
-
-    if (user == null) {
-      throw new RuntimeException("User is not found");
+    if (validateStudent(studentRegistrationRequestDTO)) {
+      throw new StudentAlreadyExistsException("STUDENT ALREADY EXISTS WITH THE PROVIDED STUDENT ID");
     }
 
-    if(!validateStudent(studentRegistrationRequestDTO)) {
-      Students registerStudent = objectMappers.mapStudentsToDatabase(studentRegistrationRequestDTO);
-      emailService.sendEmailToStudent(registerStudent.getEmail(), "STUDENT ACCOUNT CREATION", "Student Registration Success");
+    boolean user = Boolean.TRUE.equals(webClient.post()
+            .uri("api/v2/users/exists")
+            .bodyValue(Map.of(
+                    "userId", studentRegistrationRequestDTO.userId(),
+                    "email", studentRegistrationRequestDTO.email()
+            ))
+            .headers(headers -> headers.setBearerAuth(extractToken()))
+            .exchangeToMono(response -> {
+              if (response.statusCode().is2xxSuccessful()) {
+                return response.bodyToMono(Boolean.class);
+              } else if (response.statusCode().equals(HttpStatus.NOT_FOUND)) {
+                log.warn("User existence endpoint returned 404");
+                return Mono.just(Boolean.FALSE);
+              } else {
+                log.error("User existence check failed with status: {}", response.statusCode());
+                return Mono.just(Boolean.FALSE);
+              }
+            })
+            .onErrorResume(e -> {
+              log.error("Error checking user existence", e);
+              return Mono.just(Boolean.FALSE);
+            })
+            .block());
 
-      log.info("Registered student body to the database. Body value: {}", registerStudent);
-
-      createEventForPublication(registerStudent);
-      Events event = createEventForPublication(registerStudent);
-
-      rabbitTemplate.convertAndSend("student-exchange", "student.created", event);
-
-      log.info("Published student.created event for user ID: {}", registerStudent.getUserId());
-    } else {
-      throw new StudentAlreadyExistsException("STUDENT ALREADY EXISTS WITH EITHER THE PROVIDED STUDENT ID OR EMAIL");
+    if (!user) {
+      throw new UnauthorizedAccessException("CREDENTIAL DOES NOT MATCH THE USER");
     }
+
+    Students registerStudent = objectMappers.mapStudentsToDatabase(studentRegistrationRequestDTO);
+    registerStudent.setEmail(studentRegistrationRequestDTO.email());
+    studentsRepository.saveAndFlush(registerStudent);
+    emailService.sendEmailToStudent(studentRegistrationRequestDTO.email(), "STUDENT ACCOUNT CREATION", "Student Registration Success");
+
+    log.info("Registered student body to the database. Body value: {}", registerStudent);
+
+    Events event = createEventForPublication(registerStudent);
+    rabbitTemplate.convertAndSend("student-exchange", "student.created", event);
+
+    log.info("Published student.created event for user ID: {}", registerStudent.getUserId());
   }
 
   public UserResponseDTO getStudentByUserId(String userId) {
@@ -82,20 +100,24 @@ public class StudentsService {
   }
 
   public StudentRegistrationResponseDTO getStudentsByUserId(String userId) {
-    return Optional.of(studentsRepository.findStudentsByUserId(userId)
-            .orElseThrow(() -> new StudentNotFoundException("STUDENT WITH THE GIVEN ID IS NOT FOUND")))
-            .map(objectMappers::mapStudentsFromDatabase)
-            .orElse(null);
+    Optional<Students> student = studentsRepository.findStudentsByUserId(userId);
+    if(student.isPresent()) {
+      Students target = student.get();
+      return objectMappers.mapStudentsFromDatabase(target);
+    } else {
+      throw new StudentNotFoundException("STUDENT IS NOT FOUND");
+    }
   }
 
   public List<UserResponseDTO> getAllStudentsFromUserTable() {
     String userRole = "STUDENT";
-    return Collections.singletonList(webClient.get()
+    return webClient.get()
             .uri("api/v2/users/get-all-users-by-roles/" + userRole)
             .headers(headers -> headers.setBearerAuth(extractToken()))
             .retrieve()
-            .bodyToMono(UserResponseDTO.class)
-            .block());
+            .bodyToFlux(UserResponseDTO.class)
+            .collectList()
+            .block();
   }
 
   public List<StudentRegistrationResponseDTO> getAllStudents() {
@@ -140,14 +162,20 @@ public class StudentsService {
             .collect(Collectors.toList());
   }
 
+  @Transactional
   public void updateStudent(String id, StudentRegistrationRequestDTO studentRegistrationRequestDTO) {
 
     Students target = getStudentByUserIdOrThrow(id);
-      target.getGuardians().clear();
-      target.setDepartment(studentRegistrationRequestDTO.department());
-      target.setBatch(studentRegistrationRequestDTO.batch());
-      target.setGuardians(objectMappers.mapStudentGuardiansToDatabase(studentRegistrationRequestDTO.guardians()));
-      studentsRepository.saveAndFlush(target);
+    if ((!target.getUserId().equals(studentRegistrationRequestDTO.userId())) ||
+            (!target.getEmail().equals(studentRegistrationRequestDTO.email()))) {
+      throw new IllegalArgumentException("Neither the user ID nor the email can be changed.");
+    }
+    target.getGuardians().clear();
+    target.getGuardians().addAll(objectMappers.mapStudentGuardiansToDatabase(studentRegistrationRequestDTO.guardians()));
+
+    target.setDepartment(studentRegistrationRequestDTO.department());
+    target.setBatch(studentRegistrationRequestDTO.batch());
+    studentsRepository.saveAndFlush(target);
 
     log.info("Updated Student body: {}", target);
 
@@ -176,7 +204,7 @@ public class StudentsService {
   }
 
   private boolean validateStudent(StudentRegistrationRequestDTO requestDTO) {
-      return studentsRepository.existsStudentsByUserIdOrEmail(requestDTO.userId(), requestDTO.email());
+      return studentsRepository.existsStudentsByUserId(requestDTO.userId());
   }
 
   private static String extractToken() {

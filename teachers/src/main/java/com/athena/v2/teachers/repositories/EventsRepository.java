@@ -1,6 +1,6 @@
 package com.athena.v2.teachers.repositories;
 
-import com.athena.v2.users.models.Events;
+import com.athena.v2.teachers.models.Events;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -15,6 +15,7 @@ import com.athena.v2.users.models.Users;
 import com.athena.v2.users.repositories.EventsRepository;
 import com.athena.v2.users.repositories.UsersRepository;
 import com.athena.v2.users.utils.ObjectMappers;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -101,6 +102,10 @@ public class UsersService {
                 .orElse(null);
     }
 
+    public Boolean isUserExists(String username, @Email String email) {
+        return usersRepository.existsUsersByUserIdAndEmail(username, email);
+    }
+
     public void deleteUserById(String userId) {
         Users user = getUserByUserIdOrThrow(userId);
         user.setUserStatus(UserStatus.SUSPENDED);
@@ -114,22 +119,24 @@ public class UsersService {
         log.info("Published user.deleted event for user ID: {}", user.getUserId());
     }
 
-    public void updateUserStatus(String userId, String status) {
+    public void updateUserStatus(String userId) {
         Users user = getUserByUserIdOrThrow(userId);
         try {
-            user.setUserStatus(UserStatus.valueOf(status.toUpperCase()));
+            user.setUserStatus(UserStatus.ACTIVE);
         } catch (IllegalArgumentException e) {
-            throw new InvalidUserStatusException("Invalid user status provided: " + status);
+            throw new InvalidUserStatusException("Invalid user status provided: " + user.getUserStatus());
         }
         usersRepository.saveAndFlush(user);
-        log.info("User {} status updated to {}", userId, status);
+        log.info("User {} status updated to {}", userId, user.getUserStatus());
         Events updateEvent = createEventForPublication(user);
         rabbitTemplate.convertAndSend("user-exchange", "user.updated", updateEvent);
         log.info("Published user.updated for user ID: {}", user.getUserId());
     }
 
-    public void blockUser(String userId, String status) {
-        updateUserStatus(userId, status);
+    public void blockUser(String userId) {
+        Users user = getUserByUserIdOrThrow(userId);
+        user.setUserStatus(UserStatus.PERMANENTLY_REMOVED);
+        usersRepository.saveAndFlush(user);
     }
 
     public UserIdResponseDTO returnCurrentUserInformation(@CurrentUser UserIdRequestDTO userIdRequestDTO) {

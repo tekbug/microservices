@@ -4,6 +4,7 @@ import com.athena.v2.libraries.dtos.requests.UserIdRequestDTO;
 import com.athena.v2.libraries.dtos.requests.UserRequestDTO;
 import com.athena.v2.libraries.dtos.responses.UserIdResponseDTO;
 import com.athena.v2.libraries.dtos.responses.UserResponseDTO;
+import com.athena.v2.libraries.enums.UserStatus;
 import com.athena.v2.users.annotations.CurrentUser;
 import com.athena.v2.users.services.UsersService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +24,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/v2/users")
@@ -167,8 +169,8 @@ public class UsersController {
             @ApiResponse(responseCode = "500", description = "Internal server error.",
                     content = @Content(mediaType = "application/json", schema = @Schema(description = "Error response")))
     })
-    public ResponseEntity<String> reinstateUser(@Parameter(description = "Unique identifier for a User") @PathVariable String id, @Parameter(description = "User status to reinstate (e.g., ACTIVE)") String userStatus) {
-        usersService.updateUserStatus(id, userStatus);
+    public ResponseEntity<String> reinstateUser(@Parameter(description = "Unique identifier for a User") @PathVariable String id) {
+        usersService.updateUserStatus(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("user is reinstated successfully.");
     }
 
@@ -182,8 +184,8 @@ public class UsersController {
             @ApiResponse(responseCode = "500", description = "Internal server error.",
                     content = @Content(mediaType = "application/json", schema = @Schema(description = "Error response")))
     })
-    public ResponseEntity<String> blockUser(@Parameter(description = "Unique identifier for a User") @PathVariable String id, @Parameter(description = "User status to block (e.g., BLOCKED)") String userStatus) {
-        usersService.blockUser(id, userStatus);
+    public ResponseEntity<String> blockUser(@Parameter(description = "Unique identifier for a User") @PathVariable String id) {
+        usersService.blockUser(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("user is blocked successfully.");
     }
 
@@ -200,5 +202,12 @@ public class UsersController {
     public ResponseEntity<String> deleteUser(@Parameter(description = "Unique identifier for a User") @PathVariable String id) {
         usersService.deleteUserById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("user is deleted successfully.");
+    }
+
+    @PostMapping("exists")
+    public ResponseEntity<Boolean> isUserExists(@RequestBody Map<String, String> requestBody) {
+        String userId = requestBody.get("userId");
+        String email = requestBody.get("email");
+        return ResponseEntity.status(HttpStatus.OK).body(usersService.isUserExists(userId, email));
     }
 }

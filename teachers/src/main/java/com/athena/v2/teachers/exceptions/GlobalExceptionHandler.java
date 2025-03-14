@@ -1,8 +1,5 @@
 package com.athena.v2.teachers.exceptions;
 
-import com.athena.v2.students.exceptions.ErrorResponseRecord;
-import com.athena.v2.students.exceptions.StudentNotFoundException;
-import com.athena.v2.students.exceptions.UnauthorizedAccessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

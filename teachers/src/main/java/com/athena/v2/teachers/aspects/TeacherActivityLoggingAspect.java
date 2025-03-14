@@ -1,9 +1,9 @@
 package com.athena.v2.teachers.aspects;
 
-import com.athena.v2.users.enums.ActionType;
-import com.athena.v2.users.models.UsersActivityLogs;
-import com.athena.v2.users.repositories.UsersActivityLogsRepository;
-import com.athena.v2.users.services.IdGeneratorForLogsService;
+import com.athena.v2.teachers.enums.ActionType;
+import com.athena.v2.teachers.models.TeacherActivityLogs;
+import com.athena.v2.teachers.repositories.TeachersActivityLogsRepository;
+import com.athena.v2.teachers.services.IdGeneratorForLogsService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static com.athena.v2.users.aspects.UserPerformanceLoggingAspect.getUsername;
+import static com.athena.v2.teachers.aspects.TeacherPerformanceLoggingAspect.getUsername;
 
 @Aspect
 @Component
@@ -22,13 +22,13 @@ import static com.athena.v2.users.aspects.UserPerformanceLoggingAspect.getUserna
 @Slf4j
 public class TeacherActivityLoggingAspect {
 
-    private final UsersActivityLogsRepository activityLogsRepository;
+    private final TeachersActivityLogsRepository activityLogsRepository;
     private final HttpServletRequest httpServletRequest;
     private final IdGeneratorForLogsService generator;
 
-    @Around("execution(* com.athena.v2.users.services.*.*(..)) && " +
-            "!execution(* com.athena.v2.users.repositories.*.*(..)) && " +
-            "!execution(* com.athena.v2.users.services.IdGeneratorForLogsService.*(..))")
+    @Around("execution(* com.athena.v2.teachers.services.*.*(..)) && " +
+            "!execution(* com.athena.v2.teachers.repositories.*.*(..)) && " +
+            "!execution(* com.athena.v2.teachers.services.IdGeneratorForLogsService.*(..))")
     public Object logUserActivity(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
         String methodName = joinPoint.getSignature().getName();
@@ -38,7 +38,7 @@ public class TeacherActivityLoggingAspect {
         ActionType actionType = determineActionType(methodName);
         String userId = getUsernameFromToken();
 
-        UsersActivityLogs logs = new UsersActivityLogs();
+        TeacherActivityLogs logs = new TeacherActivityLogs();
         logs.setActivityId(generator.generateActivityLogId(methodName, userId));
         logs.setActionType(actionType);
         logs.setApiEndpoint("/" + methodName);

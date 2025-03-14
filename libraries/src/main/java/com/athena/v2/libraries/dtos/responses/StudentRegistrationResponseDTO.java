@@ -13,5 +13,5 @@ public record StudentRegistrationResponseDTO(
         @NonNull String department,
         @NonNull String batch,
         @NonNull List<GuardianResponseDTO> guardians,
-        @NonNull StudentStatus status
+        StudentStatus status
 ) {}

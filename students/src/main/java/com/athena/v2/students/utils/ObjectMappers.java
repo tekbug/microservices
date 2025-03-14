@@ -1,10 +1,11 @@
 package com.athena.v2.students.utils;
 
 
+import com.athena.v2.libraries.dtos.requests.StudentRegistrationRequestDTO;
 import com.athena.v2.libraries.dtos.responses.GuardianResponseDTO;
 import com.athena.v2.libraries.dtos.responses.StudentRegistrationResponseDTO;
 import com.athena.v2.libraries.dtos.requests.GuardianRequestDTO;
-import com.athena.v2.students.dtos.requests.StudentRegistrationRequestDTO;
+import com.athena.v2.students.enums.StudentStatus;
 import com.athena.v2.students.models.Guardians;
 import com.athena.v2.students.models.Students;
 import com.athena.v2.students.repositories.StudentsRepository;
@@ -27,7 +28,6 @@ public class ObjectMappers {
     public Students mapStudentsToDatabase(StudentRegistrationRequestDTO studentRegistrationRequestDTO) {
         Students students = new Students();
         students.setUserId(studentRegistrationRequestDTO.userId());
-        students.setEmail(studentRegistrationRequestDTO.email());
         students.setDepartment(studentRegistrationRequestDTO.department());
         students.setBatch(studentRegistrationRequestDTO.batch());
         students.setGuardians(mapStudentGuardiansToDatabase(studentRegistrationRequestDTO.guardians()));
@@ -52,6 +52,7 @@ public class ObjectMappers {
                                 ))
                         .collect(Collectors.toList())
                 )
+                .status(students.getStatus())
                 .build();
     }
 

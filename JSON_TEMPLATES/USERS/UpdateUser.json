@@ -1,0 +1,43 @@
+[
+  {
+    "endpoint": "http://localhost:8081/api/v2/users/update-user/{userId}"
+  },
+  {
+    "payload": [
+      {
+        "username": "username",
+        "password": "password",
+        "email": "user_email",
+        "firstName": "firstName",
+        "middleName": "middleName",
+        "lastName": "lastName",
+        "phoneNumbers": [
+          {
+            "phoneNumber": "0912345678"
+          },
+          {
+            "phoneNumber": "0912345678"
+          }
+        ],
+        "addresses": [
+          {
+            "city": "city",
+            "subCity": "sub_city",
+            "postalCode": "postal_code",
+            "streetName": "street_name",
+            "houseNo": "house_number"
+          },
+          {
+            "city": "other_city",
+            "subCity": "other_sub_city",
+            "postalCode": "other_postal_code",
+            "streetName": "other_street_name",
+            "houseNo": "other_house_number"
+          }
+        ],
+        "userStatus":"PENDING",
+        "userRoles": "STUDENT"
+      }
+    ]
+  }
+]
