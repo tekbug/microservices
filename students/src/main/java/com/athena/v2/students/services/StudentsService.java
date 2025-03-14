@@ -1,8 +1,11 @@
 package com.athena.v2.students.services;
 
+import com.athena.v2.libraries.dtos.responses.StudentRegistrationResponseDTO;
 import com.athena.v2.libraries.dtos.responses.UserResponseDTO;
 import com.athena.v2.students.dtos.requests.StudentRegistrationRequestDTO;
 import com.athena.v2.students.dtos.requests.UserRequestDTO;
+import com.athena.v2.students.dtos.responses.StudentWithUserResponseDTO;
+import com.athena.v2.students.enums.StudentStatus;
 import com.athena.v2.students.exceptions.StudentAlreadyExistsException;
 import com.athena.v2.students.exceptions.StudentNotFoundException;
 import com.athena.v2.students.exceptions.UnauthorizedAccessException;
@@ -22,9 +25,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +39,7 @@ public class StudentsService {
   private final RabbitTemplate rabbitTemplate;
   private final EventsRepository eventsRepository;
   private final ObjectMappers objectMappers;
+
 
   @Transactional
   public void registerStudent(StudentRegistrationRequestDTO studentRegistrationRequestDTO) {
@@ -78,7 +81,14 @@ public class StudentsService {
               .block();
   }
 
-  public List<UserResponseDTO> getAllStudents() {
+  public StudentRegistrationResponseDTO getStudentsByUserId(String userId) {
+    return Optional.of(studentsRepository.findStudentsByUserId(userId)
+            .orElseThrow(() -> new StudentNotFoundException("STUDENT WITH THE GIVEN ID IS NOT FOUND")))
+            .map(objectMappers::mapStudentsFromDatabase)
+            .orElse(null);
+  }
+
+  public List<UserResponseDTO> getAllStudentsFromUserTable() {
     String userRole = "STUDENT";
     return Collections.singletonList(webClient.get()
             .uri("api/v2/users/get-all-users-by-roles/" + userRole)
@@ -88,8 +98,51 @@ public class StudentsService {
             .block());
   }
 
+  public List<StudentRegistrationResponseDTO> getAllStudents() {
+      List<Students> studentsList = studentsRepository.findAll();
+      if(studentsList.isEmpty()) {
+        return Collections.emptyList();
+      }
+
+      return studentsList.stream()
+              .map(objectMappers::mapStudentsFromDatabase)
+              .collect(Collectors.toList());
+  }
+
+  public List<StudentWithUserResponseDTO> getStudentsInfoCombinedWithItsUser() {
+
+    List<UserResponseDTO> studentsList = getAllStudentsFromUserTable();
+
+    if(studentsList.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    List<StudentRegistrationResponseDTO> students = studentsRepository.findAll()
+            .stream()
+            .map(objectMappers::mapStudentsFromDatabase)
+            .toList();
+
+    Map<String, StudentRegistrationResponseDTO> studentsMap = students.stream()
+            .collect(Collectors.toMap(
+                    StudentRegistrationResponseDTO::userId,
+                    student -> student
+            ));
+
+    return studentsList.stream()
+            .map(student -> {
+              StudentRegistrationResponseDTO studentInfo = studentsMap.get(student.userId());
+
+              return StudentWithUserResponseDTO.builder()
+                      .userResponseDTO(student)
+                      .studentDTO(studentInfo)
+                      .build();
+            })
+            .collect(Collectors.toList());
+  }
+
   public void updateStudent(String id, StudentRegistrationRequestDTO studentRegistrationRequestDTO) {
-      Students target = getStudentByUserIdOrThrow(id);
+
+    Students target = getStudentByUserIdOrThrow(id);
       target.getGuardians().clear();
       target.setDepartment(studentRegistrationRequestDTO.department());
       target.setBatch(studentRegistrationRequestDTO.batch());
@@ -99,11 +152,13 @@ public class StudentsService {
     log.info("Updated Student body: {}", target);
 
     createEventForPublication(target);
+
     Events event = createEventForPublication(target);
 
     rabbitTemplate.convertAndSend("student-exchange", "user.updated", event);
 
     log.info("Published user.updated event for user ID: {}", target.getUserId());
+
   }
 
   private Events createEventForPublication(Students registerStudent) {
@@ -124,22 +179,6 @@ public class StudentsService {
       return studentsRepository.existsStudentsByUserIdAndEmail(requestDTO.userId(), requestDTO.email());
   }
 
-  private static String getUserId() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    assert authentication != null;
-
-    String userId = "";
-
-    if(authentication instanceof JwtAuthenticationToken) {
-      Jwt token = ((JwtAuthenticationToken) authentication).getToken();
-      userId = token.getClaimAsString("preferred_username");
-      log.info("Keycloak token userId as a preferred_username component: {}", userId);
-    } else {
-      throw new UnauthorizedAccessException("TOKEN CANNOT BE FOUND");
-    }
-    return userId;
-  }
-
   private static String extractToken() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null) {
@@ -151,6 +190,19 @@ public class StudentsService {
     } else {
       throw new UnauthorizedAccessException("AUTHENTICATION IS NOT JWT TYPE");
     }
+  }
+
+  public void deleteStudent(String id) {
+
+    Students student = getStudentByUserIdOrThrow(id);
+    student.setStatus(StudentStatus.SUSPENDED);
+    studentsRepository.saveAndFlush(student);
+    log.info("User {} logically deleted (status SUSPENDED)", student.getUserId());
+
+    Events deleteEvent = createEventForPublication(student);
+    rabbitTemplate.convertAndSend("user-exchange", "user.deleted", deleteEvent);
+    log.info("Published user.deleted event for user ID: {}", student.getUserId());
+
   }
 
 }

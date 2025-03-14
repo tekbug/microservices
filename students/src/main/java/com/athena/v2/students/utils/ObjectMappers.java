@@ -1,12 +1,13 @@
 package com.athena.v2.students.utils;
 
 
-import com.athena.v2.students.dtos.requests.GuardianRequestDTO;
+import com.athena.v2.libraries.dtos.responses.GuardianResponseDTO;
+import com.athena.v2.libraries.dtos.responses.StudentRegistrationResponseDTO;
+import com.athena.v2.libraries.dtos.requests.GuardianRequestDTO;
 import com.athena.v2.students.dtos.requests.StudentRegistrationRequestDTO;
 import com.athena.v2.students.models.Guardians;
 import com.athena.v2.students.models.Students;
 import com.athena.v2.students.repositories.StudentsRepository;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,25 @@ public class ObjectMappers {
         students.setStatus(studentRegistrationRequestDTO.status());
         studentsRepository.saveAndFlush(students);
         return students;
+    }
+
+    public StudentRegistrationResponseDTO mapStudentsFromDatabase(Students students) {
+        return StudentRegistrationResponseDTO.builder()
+                .userId(students.getUserId())
+                .email(students.getEmail())
+                .department(students.getDepartment())
+                .batch(students.getBatch())
+                .guardians(students.getGuardians()
+                        .stream()
+                        .map(guardians -> new GuardianResponseDTO(
+                                guardians.getName(),
+                                guardians.getEmail(),
+                                guardians.getPhoneNumber(),
+                                guardians.getRelationship()
+                                ))
+                        .collect(Collectors.toList())
+                )
+                .build();
     }
 
     public List<Guardians> mapStudentGuardiansToDatabase(List<GuardianRequestDTO> guardians) {

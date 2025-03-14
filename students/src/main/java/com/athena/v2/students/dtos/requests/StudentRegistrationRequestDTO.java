@@ -1,5 +1,6 @@
 package com.athena.v2.students.dtos.requests;
 
+import com.athena.v2.libraries.dtos.requests.GuardianRequestDTO;
 import com.athena.v2.students.enums.StudentStatus;
 import lombok.Builder;
 import lombok.NonNull;

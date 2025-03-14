@@ -1,4 +1,4 @@
-package com.athena.v2.students.dtos.requests;
+package com.athena.v2.libraries.dtos.requests;
 
 import lombok.NonNull;
 
