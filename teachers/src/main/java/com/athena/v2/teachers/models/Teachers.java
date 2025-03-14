@@ -22,7 +22,7 @@ public class Teachers {
 
     private String userId;
     private EmploymentStatus employmentStatus;
-    private LocalDateTime hiringDate;
+    private LocalDateTime hiredDate;
 
     @ElementCollection
     @CollectionTable

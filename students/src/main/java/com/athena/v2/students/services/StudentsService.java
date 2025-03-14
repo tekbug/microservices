@@ -155,7 +155,7 @@ public class StudentsService {
 
     Events event = createEventForPublication(target);
 
-    rabbitTemplate.convertAndSend("student-exchange", "user.updated", event);
+    rabbitTemplate.convertAndSend("student-exchange", "student.updated", event);
 
     log.info("Published user.updated event for user ID: {}", target.getUserId());
 
@@ -176,7 +176,7 @@ public class StudentsService {
   }
 
   private boolean validateStudent(StudentRegistrationRequestDTO requestDTO) {
-      return studentsRepository.existsStudentsByUserIdAndEmail(requestDTO.userId(), requestDTO.email());
+      return studentsRepository.existsStudentsByUserIdOrEmail(requestDTO.userId(), requestDTO.email());
   }
 
   private static String extractToken() {
@@ -197,10 +197,10 @@ public class StudentsService {
     Students student = getStudentByUserIdOrThrow(id);
     student.setStatus(StudentStatus.SUSPENDED);
     studentsRepository.saveAndFlush(student);
-    log.info("User {} logically deleted (status SUSPENDED)", student.getUserId());
+    log.info("Student {} logically deleted (status SUSPENDED)", student.getUserId());
 
     Events deleteEvent = createEventForPublication(student);
-    rabbitTemplate.convertAndSend("user-exchange", "user.deleted", deleteEvent);
+    rabbitTemplate.convertAndSend("student-exchange", "student.deleted", deleteEvent);
     log.info("Published user.deleted event for user ID: {}", student.getUserId());
 
   }

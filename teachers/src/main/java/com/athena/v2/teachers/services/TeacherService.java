@@ -2,6 +2,7 @@ package com.athena.v2.teachers.services;
 
 import com.athena.v2.libraries.dtos.requests.TeacherRegistrationRequestDTO;
 import com.athena.v2.libraries.dtos.responses.TeacherRegistrationResponseDTO;
+import com.athena.v2.libraries.dtos.responses.TeacherWithUserResponseDTO;
 import com.athena.v2.libraries.dtos.responses.UserResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

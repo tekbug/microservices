@@ -21,7 +21,7 @@ public class Qualifications {
     private Instant yearObtained;
     private String institution;
     private String documentLink;
-    private Boolean verified;
+    private Boolean isVerified;
 
     @CreationTimestamp
     private Instant createdAt;

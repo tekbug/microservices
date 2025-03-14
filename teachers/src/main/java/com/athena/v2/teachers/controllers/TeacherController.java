@@ -2,6 +2,7 @@ package com.athena.v2.teachers.controllers;
 
 import com.athena.v2.libraries.dtos.requests.TeacherRegistrationRequestDTO;
 import com.athena.v2.libraries.dtos.responses.TeacherRegistrationResponseDTO;
+import com.athena.v2.libraries.dtos.responses.TeacherWithUserResponseDTO;
 import com.athena.v2.libraries.dtos.responses.UserResponseDTO;
 
 import com.athena.v2.teachers.services.TeacherService;
@@ -46,7 +47,7 @@ public class TeacherController {
   }
 
   @GetMapping("get-teachers")
-  public ResponseEntity<List<TeacherWithUserResponseDTO>> getteachersInfoInCombination() {
+  public ResponseEntity<List<TeacherWithUserResponseDTO>> getTeachersInfoInCombination() {
     return ResponseEntity.status(HttpStatus.OK).body(teacherService.getTeachersInfoCombinedWithItsUser());
   }
 
