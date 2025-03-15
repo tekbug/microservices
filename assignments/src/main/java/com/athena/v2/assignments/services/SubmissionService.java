@@ -9,7 +9,6 @@ import com.athena.v2.assignments.exceptions.UnauthorizedAccessException;
 import com.athena.v2.assignments.models.Assignments;
 import com.athena.v2.assignments.models.Submission;
 import com.athena.v2.assignments.repositories.AssignmentsRepository;
-import com.athena.v2.assignments.repositories.SubmissionRepository;
 import com.athena.v2.assignments.repositories.SubmissionsRepository;
 import com.athena.v2.libraries.enums.AssignmentStatus;
 import lombok.RequiredArgsConstructor;
