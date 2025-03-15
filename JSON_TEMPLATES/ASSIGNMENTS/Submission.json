@@ -1,0 +1,83 @@
+[
+  {
+    "section": "Assignment Submission"
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/submissions/submit",
+    "method": "POST",
+    "description": "Submit an assignment (student only)"
+  },
+  {
+    "payload": [
+      {
+        "assignmentId": "ASG-12345",
+        "studentId": "STU-98765",
+        "submissionLink": "https://github.com/student/spring-project",
+        "submissionComment": "Completed all requirements and added extra features for sorting data"
+      },
+      {
+        "assignmentId": "ASG-67890",
+        "studentId": "STU-98765",
+        "submissionLink": "https://drive.google.com/file/d/1abc123def456/view",
+        "submissionComment": "I've completed all questions but had difficulty with question 4"
+      }
+    ]
+  },
+
+
+
+  {
+    "section": "Submission Retrieval"
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/submissions/{submissionId}",
+    "method": "GET",
+    "description": "Get a specific submission by ID",
+    "pathParams": {
+      "submissionId": "SUB-12345"
+    }
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/submissions/by-assignment/{assignmentId}",
+    "method": "GET",
+    "description": "Get all submissions for a specific assignment (teacher/admin only)",
+    "pathParams": {
+      "assignmentId": "ASG-12345"
+    }
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/submissions/by-student/{studentId}",
+    "method": "GET",
+    "description": "Get all submissions by a specific student",
+    "pathParams": {
+      "studentId": "STU-98765"
+    }
+  },
+
+
+
+
+  {
+    "section": "Grading Submissions"
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/submissions/grade/{submissionId}",
+    "method": "POST",
+    "description": "Grade a student submission (teacher/admin only)",
+    "pathParams": {
+      "submissionId": "SUB-12345"
+    }
+  },
+  {
+    "payload": [
+      {
+        "score": 95,
+        "feedback": "Excellent work! The code is well-structured and follows best practices. The extra features you added show initiative."
+      },
+      {
+        "score": 78,
+        "feedback": "Good work overall. Your solution was mostly correct, but there were some minor issues with error handling."
+      }
+    ]
+  }
+]

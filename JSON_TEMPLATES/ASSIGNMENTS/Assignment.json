@@ -1,0 +1,132 @@
+[
+  {
+    "section": "Assignment Creation"
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/assignments/create-assignment",
+    "method": "POST",
+    "description": "Create a new assignment"
+  },
+  {
+    "payload": [
+      {
+        "assignmentId": "ASG-12345",
+        "title": "Midterm Project",
+        "description": "Create a simple web application using Spring Boot",
+        "courseId": "CS301",
+        "totalPoints": 100,
+        "dueDate": "2023-11-20T23:59:59",
+        "status": "DRAFT"
+      },
+      {
+        "title": "Weekly Lab Assignment",
+        "description": "Complete the lab exercises in Chapter 5",
+        "courseId": "CS205",
+        "totalPoints": 20,
+        "dueDate": "2023-10-10T23:59:59",
+        "status": "PUBLISHED"
+      }
+    ]
+  },
+
+
+
+  {
+    "section": "Assignment Retrieval"
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/assignments/get-assignment/{assignmentId}",
+    "method": "GET",
+    "description": "Get a specific assignment by ID",
+    "pathParams": {
+      "assignmentId": "ASG-12345"
+    }
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/assignments/get-by-course/{courseId}",
+    "method": "GET",
+    "description": "Get all assignments for a specific course",
+    "pathParams": {
+      "courseId": "CS301"
+    }
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/assignments/get-all",
+    "method": "GET",
+    "description": "Get all assignments (admin only)"
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/assignments/get-upcoming",
+    "method": "GET",
+    "description": "Get all upcoming assignments (due date in the future)"
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/assignments/get-past-due",
+    "method": "GET",
+    "description": "Get all past due assignments (due date has passed)"
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/assignments/get-with-details",
+    "method": "GET",
+    "description": "Get all assignments with course details"
+  },
+
+
+
+
+  {
+    "section": "Assignment Updates"
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/assignments/update-assignment/{assignmentId}",
+    "method": "PUT",
+    "description": "Update an existing assignment",
+    "pathParams": {
+      "assignmentId": "ASG-12345"
+    }
+  },
+  {
+    "payload": [
+      {
+        "assignmentId": "ASG-12345",
+        "title": "Updated Midterm Project",
+        "description": "Create a web application with Spring Boot and React",
+        "courseId": "CS301",
+        "totalPoints": 120,
+        "dueDate": "2023-12-01T23:59:59",
+        "status": "DRAFT"
+      }
+    ]
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/assignments/publish-assignment/{assignmentId}",
+    "method": "PUT",
+    "description": "Change assignment status to PUBLISHED",
+    "pathParams": {
+      "assignmentId": "ASG-12345"
+    }
+  },
+  {
+    "endpoint": "http://localhost:8082/api/v2/assignments/close-assignment/{assignmentId}",
+    "method": "PUT",
+    "description": "Change assignment status to CLOSED",
+    "pathParams": {
+      "assignmentId": "ASG-12345"
+    }
+  },
+
+
+  {
+    "section": "Assignment Deletion"
+  },
+
+
+  {
+    "endpoint": "http://localhost:8082/api/v2/assignments/delete-assignment/{assignmentId}",
+    "method": "DELETE",
+    "description": "Archive an assignment (soft delete)",
+    "pathParams": {
+      "assignmentId": "ASG-12345"
+    }
+  }
+]

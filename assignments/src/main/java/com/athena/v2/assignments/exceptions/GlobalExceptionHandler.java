@@ -33,6 +33,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
     }
 
+    @ExceptionHandler(SubmissionNotFoundException.class)
+    public ResponseEntity<ErrorResponseRecord> handleSubmissionNotFoundException(SubmissionNotFoundException ex, WebRequest request) {
+        log.error(ex.getMessage());
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
+    }
+
     private ResponseEntity<ErrorResponseRecord> buildErrorResponse(Exception ex, HttpStatus status, WebRequest request) {
         ErrorResponseRecord responseRecord = ErrorResponseRecord.builder()
                 .timestamp(LocalDateTime.now())
