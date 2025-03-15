@@ -1,0 +1,35 @@
+[
+  {
+    "endpoint": "http://localhost:8081/api/v2/users/register-user"
+  },
+  {
+    "payload": [
+      {
+        "userId": "user_id",
+        "email": "user_email",
+        "employmentStatus": "FULL_TIME",
+        "hiredDate": "2023-01-15T09:00:00",
+        "specializations": ["Mathematics", "Computer Science", "Physics"],
+        "officeHours": "2023-01-01T13:00:00.000Z",
+        "qualifications": [
+          {
+            "qualificationType": "PhD",
+            "fieldOfStudy": "Computer Science",
+            "yearObtained": "2018-06-15T00:00:00.000Z",
+            "institution": "Stanford University",
+            "documentsLink": "https://example.com/documents/phd-certificate",
+            "isVerified": true
+          },
+          {
+            "qualificationType": "Masters",
+            "fieldOfStudy": "Mathematics",
+            "yearObtained": "2015-05-20T00:00:00.000Z",
+            "institution": "MIT",
+            "documentsLink": "https://example.com/documents/masters-certificate",
+            "isVerified": true
+          }
+        ]
+      }
+    ]
+  }
+]

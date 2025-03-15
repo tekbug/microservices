@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Configuration;
 public class OpenAPIConfig {
 
     @Bean
-    public OpenAPI apiConfiguration() {
+    public OpenAPI openApiConfigurationForCourses() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Athena User Management API Documentation")
+                        .title("Athena Courses Management API Documentation")
                         .version("2.0")
                         .description("""
                               This API provides a comprehensive set of endpoints for managing users within the system.

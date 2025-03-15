@@ -12,38 +12,38 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfiguration {
 
     @Bean
-    public TopicExchange userTopicExchange() {
-        return new TopicExchange("user-exchange");
+    public TopicExchange courseTopicExchange() {
+        return new TopicExchange("course-exchange");
     }
 
     @Bean
-    public Queue userCreatedQueue() {
-        return new Queue("user.created", true);
+    public Queue courseCreatedQueue() {
+        return new Queue("course.created", true);
     }
 
     @Bean
-    public Queue userUpdatedQueue() {
-        return new Queue("user.updated", true);
+    public Queue courseUpdatedQueue() {
+        return new Queue("course.updated", true);
     }
 
     @Bean
-    public Queue userDeletedQueue() {
-        return new Queue("user.deleted", true);
+    public Queue courseDeletedQueue() {
+        return new Queue("course.deleted", true);
     }
 
     @Bean
-    public Binding userCreatedBinding() {
-        return BindingBuilder.bind(userCreatedQueue()).to(userTopicExchange()).with("user.created");
+    public Binding courseCreatedBinding() {
+        return BindingBuilder.bind(courseCreatedQueue()).to(courseTopicExchange()).with("course.created");
     }
 
     @Bean
-    public Binding userUpdatedBinding() {
-        return BindingBuilder.bind(userUpdatedQueue()).to(userTopicExchange()).with("user.updated");
+    public Binding courseUpdatedBinding() {
+        return BindingBuilder.bind(courseUpdatedQueue()).to(courseTopicExchange()).with("course.updated");
     }
 
     @Bean
-    public Binding userDeletedBinding() {
-        return BindingBuilder.bind(userDeletedQueue()).to(userTopicExchange()).with("user.deleted");
+    public Binding courseDeletedBinding() {
+        return BindingBuilder.bind(courseDeletedQueue()).to(courseTopicExchange()).with("course.deleted");
     }
 
     @Bean
@@ -52,7 +52,7 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public AmqpTemplate rabbitTemplateCreation(ConnectionFactory connectionFactory) {
+    public AmqpTemplate rabbitTemplateCreationForCourses(ConnectionFactory connectionFactory) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
         return rabbitTemplate;

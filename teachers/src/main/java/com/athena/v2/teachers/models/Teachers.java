@@ -23,6 +23,8 @@ public class Teachers {
 
     private String userId;
     private String email;
+
+    @Enumerated(EnumType.STRING)
     private EmploymentStatus employmentStatus;
     private LocalDateTime hiredDate;
 

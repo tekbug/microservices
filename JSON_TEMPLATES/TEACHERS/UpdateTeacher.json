@@ -1,0 +1,43 @@
+[
+  {
+    "endpoint": "http://localhost:8081/api/v2/teachers/update-teacher/{userId}"
+  },
+  {
+    "payload": [
+      {
+        "userId": "user_id",
+        "email": "user_email",
+        "employmentStatus": "PART_TIME",
+        "hiredDate": "2023-01-15T09:00:00",
+        "specializations": ["Computer Science", "Artificial Intelligence"],
+        "officeHours": "2023-01-01T14:00:00.000Z",
+        "qualifications": [
+          {
+            "qualificationType": "PhD",
+            "fieldOfStudy": "Computer Science",
+            "yearObtained": "2018-06-15T00:00:00.000Z",
+            "institution": "Stanford University",
+            "documentsLink": "https://example.com/documents/phd-certificate",
+            "isVerified": true
+          },
+          {
+            "qualificationType": "Masters",
+            "fieldOfStudy": "Artificial Intelligence",
+            "yearObtained": "2015-05-20T00:00:00.000Z",
+            "institution": "MIT",
+            "documentsLink": "https://example.com/documents/masters-certificate",
+            "isVerified": true
+          },
+          {
+            "qualificationType": "Certification",
+            "fieldOfStudy": "Machine Learning",
+            "yearObtained": "2020-03-10T00:00:00.000Z",
+            "institution": "Coursera",
+            "documentsLink": "https://example.com/documents/certification",
+            "isVerified": false
+          }
+        ]
+      }
+    ]
+  }
+]
