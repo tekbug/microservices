@@ -1,6 +1,6 @@
 package com.athena.v2.courses.listeners;
 
-import com.athena.v2.teachers.models.Events;
+import com.athena.v2.courses.models.Events;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -11,17 +11,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TeacherEventListener {
 
-    @RabbitListener(queues = "teacher.created")
+    @RabbitListener(queues = "course.created")
     public void handleTeacherCreation(Events events) {
         // TODO: Implement email service for confirming creation of a teacher
     }
 
-    @RabbitListener(queues = "teacher.updated")
+    @RabbitListener(queues = "course.updated")
     public void handleTeacherUpdate(Events events) {
         // TODO: Implement email service for confirming the updated information of a teacher
     }
 
-    @RabbitListener(queues = "teacher.deleted")
+    @RabbitListener(queues = "course.deleted")
     public void handleTeacherDeletion(Events events) {
         // TODO: Implement email service for confirming the deletion of a teacher
     }

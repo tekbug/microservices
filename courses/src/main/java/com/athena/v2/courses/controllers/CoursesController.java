@@ -1,5 +1,9 @@
 package com.athena.v2.courses.controllers;
 
+import com.athena.v2.courses.services.CourseService;
+import com.athena.v2.libraries.dtos.requests.CourseRegistrationRequestDTO;
+import com.athena.v2.libraries.dtos.responses.CourseRegistrationResponseDTO;
+import com.athena.v2.libraries.dtos.responses.CourseWithTeacherResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -8,13 +12,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v2/courses")
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class CoursesController {
 
-    private final CoursesService coursesService;
+    private final CourseService coursesService;
 
     @PostMapping("/register-course")
     @PreAuthorize("hasRole('ADMINISTRATOR')")
@@ -45,11 +51,11 @@ public class CoursesController {
 
     @GetMapping("get-courses-with-teachers")
     public ResponseEntity<List<CourseWithTeacherResponseDTO>> getCoursesWithTeacherInfo() {
-        return ResponseEntity.status(HttpStatus.OK).body(coursesService.getCoursesWithTeacherInfo());
+        return ResponseEntity.status(HttpStatus.OK).body(coursesService.getCoursesInfoCombinedWithItsTeacher());
     }
 
     @PutMapping("update-course/{courseId}")
-    @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'TEACHER')")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
     public ResponseEntity<String> updateCourse(@PathVariable String courseId, @RequestBody CourseRegistrationRequestDTO requestDTO) {
         coursesService.updateCourse(courseId, requestDTO);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Course has been updated");
@@ -63,14 +69,14 @@ public class CoursesController {
     }
 
     @PostMapping("increment-enrollment/{courseId}")
-    @PreAuthorize("hasAnyRole('ADMINISTRATOR')")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
     public ResponseEntity<String> incrementEnrollment(@PathVariable String courseId) {
         coursesService.incrementEnrollment(courseId);
         return ResponseEntity.status(HttpStatus.OK).body("Course enrollment incremented");
     }
 
     @PostMapping("decrement-enrollment/{courseId}")
-    @PreAuthorize("hasAnyRole('ADMINISTRATOR')")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
     public ResponseEntity<String> decrementEnrollment(@PathVariable String courseId) {
         coursesService.decrementEnrollment(courseId);
         return ResponseEntity.status(HttpStatus.OK).body("Course enrollment decremented");

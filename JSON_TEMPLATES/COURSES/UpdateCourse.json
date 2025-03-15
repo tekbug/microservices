@@ -1,0 +1,35 @@
+[
+  {
+    "endpoint": "http://localhost:8081/api/v2/courses/update-course/{courseId}"
+  },
+  {
+    "payload": [
+      {
+        "courseId": "CS101",
+        "courseTitle": "Introduction to Computer Programming",
+        "courseDescription": "An updated beginner's course to programming concepts using Java",
+        "department": "Computer Science",
+        "creditHours": 4,
+        "teacherId": "different_teacher_id",
+        "maxCapacity": 35,
+        "currentEnrollment": 5,
+        "scheduleDays": ["TUESDAY", "THURSDAY"],
+        "startTime": "10:00:00",
+        "endTime": "11:30:00",
+        "prerequisites": [
+          {
+            "prerequisiteCourseId": "MATH101",
+            "prerequisiteCourseName": "College Algebra",
+            "minimumGrade": 75
+          },
+          {
+            "prerequisiteCourseId": "CS100",
+            "prerequisiteCourseName": "Computer Basics",
+            "minimumGrade": 70
+          }
+        ],
+        "status": "ACTIVE"
+      }
+    ]
+  }
+]

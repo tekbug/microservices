@@ -1,6 +1,5 @@
 package com.athena.v2.courses.exceptions;
 
-import com.athena.v2.teachers.exceptions.UnauthorizedAccessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +21,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.UNAUTHORIZED, request);
     }
 
-    @ExceptionHandler(TeacherAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponseRecord> handleStudentAlreadyExistsException(TeacherAlreadyExistsException ex, WebRequest request) {
-        log.error("Teacher already exists: ", ex);
+    @ExceptionHandler(CourseAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseRecord> handleStudentAlreadyExistsException(CourseAlreadyExistsException ex, WebRequest request) {
+        log.error("Course already exists: ", ex);
         return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler(TeacherNotFoundException.class)
-    public ResponseEntity<ErrorResponseRecord> handleStudentNotFoundException(TeacherNotFoundException ex, WebRequest request) {
-        log.error("Teacher not found: ", ex);
+    @ExceptionHandler(CourseNotFoundException.class)
+    public ResponseEntity<ErrorResponseRecord> handleStudentNotFoundException(CourseNotFoundException ex, WebRequest request) {
+        log.error("Course not found: ", ex);
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
     }
 

@@ -4,7 +4,6 @@ import com.athena.v2.libraries.dtos.requests.UserIdRequestDTO;
 import com.athena.v2.libraries.dtos.requests.UserRequestDTO;
 import com.athena.v2.libraries.dtos.responses.UserIdResponseDTO;
 import com.athena.v2.libraries.dtos.responses.UserResponseDTO;
-import com.athena.v2.libraries.enums.UserStatus;
 import com.athena.v2.users.annotations.CurrentUser;
 import com.athena.v2.users.services.UsersService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +32,7 @@ import java.util.Map;
             Endpoints that are being used to manage users within the system.
             The endpoints are only accessible by users with role of 'ADMIN' or 'SUPER_ADMIN'
         """)
+@EnableMethodSecurity
 @PreAuthorize("hasRole('ADMINISTRATOR')")
 public class UsersController {
 
@@ -209,5 +209,15 @@ public class UsersController {
         String userId = requestBody.get("userId");
         String email = requestBody.get("email");
         return ResponseEntity.status(HttpStatus.OK).body(usersService.isUserExists(userId, email));
+    }
+
+    @PostMapping("exists-user")
+    public ResponseEntity<Boolean> isUserExist(@RequestBody String userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(usersService.isUserExist(userId));
+    }
+
+    @GetMapping("get-email")
+    public ResponseEntity<String> getUserEmail(@RequestBody String userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(usersService.getEmailForUserById(userId));
     }
 }

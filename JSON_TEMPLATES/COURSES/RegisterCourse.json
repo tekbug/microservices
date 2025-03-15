@@ -1,0 +1,30 @@
+[
+  {
+    "endpoint": "http://localhost:8081/api/v2/courses/register-course"
+  },
+  {
+    "payload": [
+      {
+        "courseId": "CS101",
+        "courseTitle": "Introduction to Programming",
+        "courseDescription": "A beginner's course to programming concepts using Java",
+        "department": "Computer Science",
+        "creditHours": 3,
+        "teacherId": "teacher_id",
+        "maxCapacity": 30,
+        "currentEnrollment": 0,
+        "scheduleDays": ["MONDAY", "WEDNESDAY"],
+        "startTime": "09:00:00",
+        "endTime": "10:30:00",
+        "prerequisites": [
+          {
+            "prerequisiteCourseId": "MATH101",
+            "prerequisiteCourseName": "College Algebra",
+            "minimumGrade": 70
+          }
+        ],
+        "status": "ACTIVE"
+      }
+    ]
+  }
+]

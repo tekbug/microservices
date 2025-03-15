@@ -206,4 +206,17 @@ public class UsersService {
         eventsRepository.saveAndFlush(event);
         return event;
     }
+
+    public Boolean isUserExist(String userId) {
+        return usersRepository.existsUsersByUserId(userId);
+    }
+
+    public String getEmailForUserById(String userId) {
+        Optional<Users> user = usersRepository.findUsersByUserId(userId);
+        if (user.isPresent()) {
+            return user.get().getEmail();
+        } else {
+            throw new UserNotFoundException("USER WITH USER ID " + userId + " NOT FOUND");
+        }
+    }
 }

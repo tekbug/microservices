@@ -12,38 +12,38 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfiguration {
 
     @Bean
-    public TopicExchange userTopicExchange() {
-        return new TopicExchange("user-exchange");
+    public TopicExchange enrollmentTopicExchange() {
+        return new TopicExchange("enrollment-exchange");
     }
 
     @Bean
-    public Queue userCreatedQueue() {
-        return new Queue("user.created", true);
+    public Queue enrollmentCreatedQueue() {
+        return new Queue("enrollment.created", true);
     }
 
     @Bean
-    public Queue userUpdatedQueue() {
-        return new Queue("user.updated", true);
+    public Queue enrollmentUpdatedQueue() {
+        return new Queue("enrollment.updated", true);
     }
 
     @Bean
-    public Queue userDeletedQueue() {
-        return new Queue("user.deleted", true);
+    public Queue enrollmentDeletedQueue() {
+        return new Queue("enrollment.deleted", true);
     }
 
     @Bean
-    public Binding userCreatedBinding() {
-        return BindingBuilder.bind(userCreatedQueue()).to(userTopicExchange()).with("user.created");
+    public Binding enrollmentCreatedBinding() {
+        return BindingBuilder.bind(enrollmentCreatedQueue()).to(enrollmentTopicExchange()).with("enrollment.created");
     }
 
     @Bean
-    public Binding userUpdatedBinding() {
-        return BindingBuilder.bind(userUpdatedQueue()).to(userTopicExchange()).with("user.updated");
+    public Binding enrollmentUpdatedBinding() {
+        return BindingBuilder.bind(enrollmentUpdatedQueue()).to(enrollmentTopicExchange()).with("enrollment.updated");
     }
 
     @Bean
-    public Binding userDeletedBinding() {
-        return BindingBuilder.bind(userDeletedQueue()).to(userTopicExchange()).with("user.deleted");
+    public Binding enrollmentDeletedBinding() {
+        return BindingBuilder.bind(enrollmentDeletedQueue()).to(enrollmentTopicExchange()).with("enrollment.deleted");
     }
 
     @Bean
@@ -52,7 +52,7 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public AmqpTemplate rabbitTemplateCreation(ConnectionFactory connectionFactory) {
+    public AmqpTemplate rabbitTemplateCreationForEnrollments(ConnectionFactory connectionFactory) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
         return rabbitTemplate;

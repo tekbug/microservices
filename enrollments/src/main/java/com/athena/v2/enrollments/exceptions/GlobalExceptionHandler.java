@@ -15,52 +15,22 @@ import java.util.List;
 @Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(UserAlreadyExistException.class)
-    public ResponseEntity<ErrorResponseRecord> handleUserAlreadyExistException(UserAlreadyExistException ex, WebRequest request) {
-        log.error("User already exists. See log here: ", ex);
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<ErrorResponseRecord> handleUnauthorizedAccessException(UnauthorizedAccessException ex, WebRequest request) {
+        log.error("Unauthorized Access Exception", ex);
+        return buildErrorResponse(ex, HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler(EnrollmentAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseRecord> handleStudentAlreadyExistsException(EnrollmentAlreadyExistsException ex, WebRequest request) {
+        log.error("Enrollment already exists: ", ex);
         return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponseRecord> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
-        log.error("User is not found, See log here: ", ex);
+    @ExceptionHandler(EnrollmentNotFoundException.class)
+    public ResponseEntity<ErrorResponseRecord> handleStudentNotFoundException(EnrollmentNotFoundException ex, WebRequest request) {
+        log.error("Enrollment not found: ", ex);
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
-    }
-
-    @ExceptionHandler(RoleNotFoundException.class)
-    public ResponseEntity<ErrorResponseRecord> handleRoleNotFoundException(RoleNotFoundException ex, WebRequest request) {
-        log.error("Specified role is not found. See full log here: ", ex);
-        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
-    }
-
-    @ExceptionHandler(KeycloakRegistrationIntegrationErrorException.class)
-    public ResponseEntity<ErrorResponseRecord> handleKeycloakError(KeycloakRegistrationIntegrationErrorException ex, WebRequest request) {
-        log.error("External service error occurred with keycloak: ", ex);
-        return buildErrorResponse(ex, HttpStatus.UNPROCESSABLE_ENTITY, request);
-    }
-
-    @ExceptionHandler(KeycloakSessionRetrievalException.class)
-    public ResponseEntity<ErrorResponseRecord> handleKeycloakSessionRetrievalException(KeycloakSessionRetrievalException ex, WebRequest request) {
-        log.error("External service error occurred with keycloak: ", ex);
-        return buildErrorResponse(ex, HttpStatus.UNPROCESSABLE_ENTITY, request);
-    }
-
-    @ExceptionHandler(UnableToFetchNotificationException.class)
-    public ResponseEntity<ErrorResponseRecord> handleUnableToFetchNotificationException(UnableToFetchNotificationException ex, WebRequest request) {
-        log.error("Unable to fetch notification. See log here: ", ex);
-        return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, request);
-    }
-
-    @ExceptionHandler(InvalidUserStatusException.class)
-    public ResponseEntity<ErrorResponseRecord> handleInvalidUserStatusException(InvalidUserStatusException ex, WebRequest request) {
-        log.error("Invalid user status. See log here: ", ex);
-        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, request);
-    }
-
-    @ExceptionHandler(UnauthorizedAccessException.class)
-    public ResponseEntity<ErrorResponseRecord> handleUnauthorizedAccessException(UnauthorizedAccessException ex, WebRequest request) {
-        log.error("Unauthorized access. See log here: ", ex);
-        return buildErrorResponse(ex, HttpStatus.UNAUTHORIZED, request);
     }
 
     private ResponseEntity<ErrorResponseRecord> buildErrorResponse(Exception ex, HttpStatus status, WebRequest request) {

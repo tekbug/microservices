@@ -1,0 +1,15 @@
+[
+  {
+    "endpoint": "http://localhost:8081/api/v2/enrollments/update-enrollment/{enrollmentId}"
+  },
+  {
+    "payload": [
+      {
+        "enrollmentId": "ENR123",
+        "studentId": "student_id",
+        "courseId": "course_id",
+        "status": "COMPLETED"
+      }
+    ]
+  }
+]

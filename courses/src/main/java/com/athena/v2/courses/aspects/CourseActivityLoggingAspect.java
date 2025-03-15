@@ -82,14 +82,14 @@ public class CourseActivityLoggingAspect {
 
     public static ActionType getActionType(String methodName) {
         return switch(methodName) {
-            case "registerUser" -> ActionType.USER_REGISTRATION;
-            case "getAllUsers" -> ActionType.USER_FETCH_ALL;
-            case "getUser" -> ActionType.USER_FETCH_BY_USERNAME;
-            case "getUsersByStatus" -> ActionType.USER_FETCH_ALL_BY_STATUS;
-            case "updateUser" -> ActionType.USER_UPDATE;
-            case "reinstateUser" -> ActionType.USER_REINSTATE;
-            case "blockUser" -> ActionType.USER_BLOCK;
-            case "deleteUser" -> ActionType.USER_DELETE;
+            case "registerCourse" -> ActionType.COURSE_REGISTRATION;
+            case "getAllCourses" -> ActionType.COURSE_FETCH_ALL;
+            case "getCourse" -> ActionType.COURSE_FETCH_BY_COURSE_NAME;
+            case "getCourseByStatus" -> ActionType.COURSE_FETCH_ALL_BY_STATUS;
+            case "updateCourse" -> ActionType.COURSE_UPDATE;
+            case "reinstateCourse" -> ActionType.COURSE_REINSTATE;
+            case "blockCourse" -> ActionType.COURSE_BLOCK;
+            case "deleteCourse" -> ActionType.COURSE_DELETE;
             default -> ActionType.DEFAULT_FLAG;
         };
     }
